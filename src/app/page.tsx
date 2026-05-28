@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
-import { ArrowRight, Mail, X, ChevronRight, Layout, Workflow, MonitorSmartphone } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ArrowRight, Mail, X, ChevronRight, Layout, Workflow, MonitorSmartphone, Sun, Moon } from 'lucide-react';
 
-// --- Custom Brand Icons (lucide-react 1.17+ 已移除品牌图标) ---
+// ── Custom Brand Icons ──
 const GithubIcon = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
@@ -18,9 +18,7 @@ const TwitterIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-// --- Configuration & Data ---
-
-// 采用更平滑、带有轻微物理惯性的贝塞尔曲线，取代原本生硬的线性过渡
+// ── Configuration ──
 const BEZIER = 'cubic-bezier(0.2, 0.8, 0.2, 1)';
 
 const PROJECTS = [
@@ -33,7 +31,7 @@ const PROJECTS = [
     description: 'StableAgent OS 是我对未来 AI Agent 产品界面的探索。它不是单纯的聊天窗口，而是一种更接近"工作台"的界面概念：用户可以看见任务如何被拆解、Agent 如何执行、结果如何被评估，以及人在什么节点介入。',
     roles: ['Interface Designer', 'Product Storyteller', 'Frontend Prototyper'],
     tags: ['Agent UI', 'Workflow Visualization', 'Human-in-the-loop'],
-    size: 'large', 
+    size: 'large',
     visualType: 'dashboard',
     story: {
       why: '当前大多数 AI Agent 都局限于对话流，缺乏对复杂任务的全局感知和执行干预能力。',
@@ -49,9 +47,7 @@ const PROJECTS = [
     reflection: '我理解了 AI 产品的核心不在于拟人化，而在于信任感。用户只有看懂了 AI 在做什么，才会真正信任并把工作交给它。下一步将探索更细颗粒度的节点编辑能力。',
     cover: '/ChatGPT Image 2026年5月29日 01_25_19 (1).png',
     video: '/1.mp4',
-    gallery: [
-      '/ChatGPT Image 2026年5月29日 01_25_19 (1).png'
-    ]
+    gallery: ['/ChatGPT Image 2026年5月29日 01_25_19 (1).png']
   },
   {
     id: 'vibe-copilot',
@@ -78,9 +74,7 @@ const PROJECTS = [
     reflection: '好产品不是替用户思考，而是搭建脚手架帮助用户思考。下一步计划引入历史组件库的联动匹配。',
     cover: '/ChatGPT Image 2026年5月29日 01_25_19 (2).png',
     video: '/2.mp4',
-    gallery: [
-      '/ChatGPT Image 2026年5月29日 01_25_19 (2).png'
-    ]
+    gallery: ['/ChatGPT Image 2026年5月29日 01_25_19 (2).png']
   },
   {
     id: 'controlnet-workflow',
@@ -107,9 +101,7 @@ const PROJECTS = [
     reflection: 'AI 并不是终点，它只是工作流中的一个强力滤镜。下一步计划将工作流打包为更轻量的设计师 API 工具。',
     cover: '/ChatGPT Image 2026年5月29日 01_25_19 (3).png',
     video: '/3.mp4',
-    gallery: [
-      '/ChatGPT Image 2026年5月29日 01_25_19 (3).png'
-    ]
+    gallery: ['/ChatGPT Image 2026年5月29日 01_25_19 (3).png']
   },
   {
     id: 'idea-translator',
@@ -136,20 +128,36 @@ const PROJECTS = [
     reflection: '结构化是 LLM 最被低估的能力。下一步可以加入一键生成需求文档（PRD）功能。',
     cover: '/ChatGPT Image 2026年5月29日 01_25_19 (4).png',
     video: '/4.mp4',
-    gallery: [
-      '/ChatGPT Image 2026年5月29日 01_25_19 (4).png'
-    ]
+    gallery: ['/ChatGPT Image 2026年5月29日 01_25_19 (4).png']
   }
 ];
 
-// --- Theme Context ---
-const ThemeContext = React.createContext({
-  isSilverBlue: false
-});
+// ── Theme Hook ──
+function useTheme() {
+  const [isLight, setIsLight] = useState(false);
 
-// --- Utilities & Hooks ---
+  useEffect(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
+    if (saved === 'light') setIsLight(true);
+    else if (saved === 'dark') setIsLight(false);
+    else if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      setIsLight(true);
+    }
+  }, []);
 
-// 优化点 1：将 `IntersectionObserver` 抽象为复用钩子
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    }
+  }, [isLight]);
+
+  const toggle = useCallback(() => setIsLight(p => !p), []);
+
+  return { isLight, toggle };
+}
+
+// ── Intersection Observer Hook ──
 function useIntersectionObserver(options = {}) {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -169,9 +177,8 @@ function useIntersectionObserver(options = {}) {
   return [ref, isIntersecting] as const;
 }
 
-// --- Components ---
+// ── Components ──
 
-// 优化点 2：DOM 隔离的零延迟进度条，避免 React 树的重渲染
 const ProgressBar = () => {
   const progressRef = useRef<HTMLDivElement>(null);
 
@@ -196,28 +203,34 @@ const ProgressBar = () => {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 w-full h-[3px] bg-white/[0.02] z-50 origin-left">
-      <div 
+    <div className="fixed top-0 left-0 w-full h-[3px] z-50 origin-left" style={{ background: 'var(--progress-track)' }}>
+      <div
         ref={progressRef}
-        className="h-full bg-white/40 origin-left scale-x-0"
-        style={{ transition: 'transform 0.1s ease-out' }}
+        className="h-full origin-left scale-x-0"
+        style={{ background: 'var(--progress-fill)', transition: 'transform 0.1s ease-out' }}
       />
     </div>
   );
 };
 
-// 优化点 3：底层 Canvas 有机环境光引擎
 const HeroVisual = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { isSilverBlue } = useContext(ThemeContext);
+  const [isLight, setIsLight] = useState(false);
   const mouse = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    mouse.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mouse.current = { x: e.clientX, y: e.clientY };
+    const handler = () => {
+      setIsLight(document.documentElement.getAttribute('data-theme') === 'light');
     };
+    handler();
+    const obs = new MutationObserver(handler);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    mouse.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    const handleMouseMove = (e: MouseEvent) => { mouse.current = { x: e.clientX, y: e.clientY }; };
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
     const canvas = canvasRef.current;
@@ -227,15 +240,12 @@ const HeroVisual = () => {
 
     let width = canvas.width = window.innerWidth / 2;
     let height = canvas.height = window.innerHeight;
-    
-    // 响应窗口调整
     const handleResize = () => {
-       width = canvas.width = window.innerWidth / 2;
-       height = canvas.height = window.innerHeight;
+      width = canvas.width = window.innerWidth / 2;
+      height = canvas.height = window.innerHeight;
     };
     window.addEventListener('resize', handleResize);
 
-    // 粒子系统：生成 4 个浮动光球
     const orbs = Array.from({ length: 4 }).map(() => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -245,87 +255,49 @@ const HeroVisual = () => {
     }));
 
     let animationFrameId: number;
-
     const render = () => {
       ctx.clearRect(0, 0, width, height);
-
-      // 根据主题动态调整流体基色
-      const baseColor = isSilverBlue ? '168, 192, 216' : '255, 255, 255';
-      
-      // 使用更柔和的混合模式
+      const baseColor = isLight ? '200, 210, 230' : '255, 255, 255';
       ctx.globalCompositeOperation = 'screen';
-
       orbs.forEach((orb, i) => {
-        // 缓慢的边界碰撞
         if (orb.x < 0 || orb.x > width) orb.vx *= -1;
         if (orb.y < 0 || orb.y > height) orb.vy *= -1;
-        orb.x += orb.vx;
-        orb.y += orb.vy;
-
-        // 鼠标产生的微弱引力效应
+        orb.x += orb.vx; orb.y += orb.vy;
         const dx = mouse.current.x - (window.innerWidth / 2) - orb.x + width/2;
         const dy = mouse.current.y - orb.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 400) {
-          orb.x += dx * 0.001;
-          orb.y += dy * 0.001;
-        }
-
+        if (dist < 400) { orb.x += dx * 0.001; orb.y += dy * 0.001; }
         const gradient = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
-        // 主光球和辅助光球的透明度区分
         const alpha = i === 0 ? 0.08 : 0.04;
         gradient.addColorStop(0, `rgba(${baseColor}, ${alpha})`);
         gradient.addColorStop(1, `rgba(${baseColor}, 0)`);
-
         ctx.fillStyle = gradient;
         ctx.beginPath();
         ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
         ctx.fill();
       });
-
       animationFrameId = requestAnimationFrame(render);
     };
-
     render();
-
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isSilverBlue]);
+  }, [isLight]);
 
   return (
     <div className="relative w-full h-[50vh] md:h-full flex items-center justify-center perspective-[1000px]">
-      <canvas 
-        ref={canvasRef} 
-        className="absolute inset-0 pointer-events-none opacity-80" 
-        style={{ width: '100%', height: '100%', filter: 'blur(30px)' }}
-      />
-      
-      {/* 维持你原有的高分辨率图片浮窗，利用 CSS 3D 透视 */}
-      <div 
-        className="absolute w-64 h-40 md:w-96 md:h-56 border border-white/10 bg-black backdrop-blur-2xl rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-1000 overflow-hidden"
-        style={{ transform: `rotateX(15deg) rotateY(-15deg) translateZ(50px)` }}
-      >
-        <img 
-          src={PROJECTS[0].cover} 
-          alt="StableAgent OS" 
-          className="w-full h-full object-cover opacity-90" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-tr from-black/40 to-transparent pointer-events-none"></div>
+      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none opacity-80" style={{ width: '100%', height: '100%', filter: 'blur(30px)' }} />
+      <div className="absolute w-64 h-40 md:w-96 md:h-56 border rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-1000 overflow-hidden"
+        style={{ transform: `rotateX(15deg) rotateY(-15deg) translateZ(50px)`, borderColor: 'var(--border-subtle)', background: 'var(--bg-primary)' }}>
+        <img src={PROJECTS[0].cover} alt="StableAgent OS" className="w-full h-full object-cover opacity-90" />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top right, var(--bg-primary) 40%, transparent)' }} />
       </div>
-
-      <div 
-        className="absolute w-56 h-32 md:w-80 md:h-48 border border-white/10 bg-[#111] backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-2xl z-10 transition-all duration-1000 overflow-hidden"
-        style={{ transform: `rotateX(5deg) rotateY(10deg) translateZ(100px)` }}
-      >
-        <img 
-          src={PROJECTS[2].cover} 
-          alt="ControlNet Workflow" 
-          className="w-full h-full object-cover opacity-90" 
-        />
-        <div className="absolute inset-0 border-[rgba(var(--accent-rgb),0.2)] border transition-colors duration-1000 rounded-2xl pointer-events-none"></div>
+      <div className="absolute w-56 h-32 md:w-80 md:h-48 border rounded-2xl flex items-center justify-center shadow-2xl z-10 transition-all duration-1000 overflow-hidden"
+        style={{ transform: `rotateX(5deg) rotateY(10deg) translateZ(100px)`, borderColor: 'var(--border-subtle)', background: 'var(--bg-secondary)' }}>
+        <img src={PROJECTS[2].cover} alt="ControlNet Workflow" className="w-full h-full object-cover opacity-90" />
+        <div className="absolute inset-0 border rounded-2xl pointer-events-none transition-colors duration-1000" style={{ borderColor: 'rgba(var(--accent-rgb), 0.2)' }} />
       </div>
     </div>
   );
@@ -333,40 +305,38 @@ const HeroVisual = () => {
 
 const ImageGallery = ({ images }: { images?: string[] }) => {
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
-
   if (!images || images.length === 0) return null;
 
   return (
     <div className="mb-16">
-       <h3 className="text-2xl font-medium text-white tracking-tight mb-8">Visual Gallery</h3>
-       {/* 增加了惯性滑动缓冲支持 */}
-       <div className="flex overflow-x-auto gap-6 pb-6 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden touch-pan-x" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-         {images.map((img, i) => (
-            <button 
-              key={i} 
-              aria-label="Enlarge image"
-              className="min-w-[85%] md:min-w-[65%] snap-center relative group focus:outline-none focus:ring-2 focus:ring-white/30 rounded-2xl" 
-              onClick={() => setLightboxImg(img)}
-            >
-               <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-10 rounded-2xl flex items-center justify-center backdrop-blur-sm duration-500">
-                  <span className="text-white text-sm font-mono tracking-widest bg-black/50 px-4 py-2 rounded-full border border-white/10">Enlarge</span>
-               </div>
-               <img src={img} alt={`Gallery ${i}`} className="w-full h-[300px] md:h-[450px] object-cover rounded-2xl border border-white/5 shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]" />
-            </button>
-         ))}
-       </div>
-       
-       <div className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-2xl transition-all duration-500 ${lightboxImg ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setLightboxImg(null)}>
-          <div className={`transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${lightboxImg ? 'scale-100 translate-y-0' : 'scale-95 translate-y-8'}`}>
-             {lightboxImg && <img src={lightboxImg} className="max-w-[95vw] max-h-[95vh] object-contain rounded-xl shadow-2xl" alt="Lightbox" />}
-          </div>
-          <button 
-             aria-label="Close lightbox"
-             className="absolute top-6 right-6 md:top-10 md:right-10 text-white w-12 h-12 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 transition-colors border border-white/10 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-white"
-          >
-            <X size={24} />
+      <h3 className="text-2xl font-medium tracking-tight mb-8" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Visual Gallery</h3>
+      <div className="flex overflow-x-auto gap-6 pb-6 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden touch-pan-x" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+        {images.map((img, i) => (
+          <button key={i} aria-label="Enlarge image"
+            className="min-w-[85%] md:min-w-[65%] snap-center relative group focus:outline-none focus:ring-2 rounded-2xl"
+            onClick={() => setLightboxImg(img)}>
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity z-10 rounded-2xl flex items-center justify-center backdrop-blur-sm duration-500"
+              style={{ background: 'var(--bg-card-10)' }}>
+              <span className="text-sm font-mono tracking-widest px-4 py-2 rounded-full border"
+                style={{ background: 'var(--bg-card-8)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>Enlarge</span>
+            </div>
+            <img src={img} alt={`Gallery ${i}`} className="w-full h-[300px] md:h-[450px] object-cover rounded-2xl border shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]"
+              style={{ borderColor: 'var(--border-subtle)' }} />
           </button>
-       </div>
+        ))}
+      </div>
+      <div className={`fixed inset-0 z-[100] flex items-center justify-center transition-all duration-500 ${lightboxImg ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        style={{ background: 'var(--bg-overlay)', backdropFilter: 'blur(24px)' }}
+        onClick={() => setLightboxImg(null)}>
+        <div className={`transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${lightboxImg ? 'scale-100 translate-y-0' : 'scale-95 translate-y-8'}`}>
+          {lightboxImg && <img src={lightboxImg} className="max-w-[95vw] max-h-[95vh] object-contain rounded-xl shadow-2xl" alt="Lightbox" />}
+        </div>
+        <button aria-label="Close lightbox" onClick={() => setLightboxImg(null)}
+          className="absolute top-6 right-6 md:top-10 md:right-10 w-12 h-12 flex items-center justify-center rounded-full hover:transition-colors border backdrop-blur-md focus:outline-none focus:ring-2"
+          style={{ background: 'var(--bg-card-10)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
+          <X size={24} />
+        </button>
+      </div>
     </div>
   );
 };
@@ -374,16 +344,8 @@ const ImageGallery = ({ images }: { images?: string[] }) => {
 const Reveal = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => {
   const [ref, isVisible] = useIntersectionObserver();
   return (
-    <div
-      ref={ref}
-      className={`transition-all duration-1000 ${className}`}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
-        transitionTimingFunction: BEZIER,
-        transitionDelay: `${delay}ms`
-      }}
-    >
+    <div ref={ref} className={`transition-all duration-1000 ${className}`}
+      style={{ opacity: isVisible ? 1 : 0, transform: isVisible ? 'translateY(0)' : 'translateY(40px)', transitionTimingFunction: BEZIER, transitionDelay: `${delay}ms` }}>
       {children}
     </div>
   );
@@ -398,95 +360,43 @@ const SpotlightCard = ({ children, className = "", onClick, videoSrc }: { childr
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!divRef.current) return;
-    const div = divRef.current;
-    const rect = div.getBoundingClientRect();
+    const rect = divRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     setPosition({ x, y });
-
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -3;
-    const rotateY = ((x - centerX) / centerX) * 3;
-    setRotation({ x: rotateX, y: rotateY });
+    setRotation({ x: ((y - centerY) / centerY) * -3, y: ((x - centerX) / centerX) * 3 });
   };
 
-  const playVideo = () => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {});
-    }
-  };
+  const playVideo = () => { videoRef.current?.play().catch(() => {}); };
+  const pauseVideo = () => { if (videoRef.current) { videoRef.current.pause(); videoRef.current.currentTime = 0; } };
 
-  const pauseVideo = () => {
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
-  };
-
-  const handleMouseEnter = () => {
-    setOpacity(1);
-    playVideo();
-  };
-
-  const handleMouseLeave = () => {
-    setOpacity(0);
-    setRotation({ x: 0, y: 0 });
-    pauseVideo();
-  };
-
-  const handleTouchStart = () => {
-    setOpacity(1);
-    playVideo();
-  };
-
-  const handleTouchEnd = () => {
-    setOpacity(0);
-    setRotation({ x: 0, y: 0 });
-    pauseVideo();
-  };
+  const handleMouseEnter = () => { setOpacity(1); playVideo(); };
+  const handleMouseLeave = () => { setOpacity(0); setRotation({ x: 0, y: 0 }); pauseVideo(); };
+  const handleTouchStart = () => { setOpacity(1); playVideo(); };
+  const handleTouchEnd = () => { setOpacity(0); setRotation({ x: 0, y: 0 }); pauseVideo(); };
 
   return (
-    <div
-      ref={divRef}
-      role="button"
-      tabIndex={0}
-      aria-label="View Project Case Study"
+    <div ref={divRef} role="button" tabIndex={0} aria-label="View Project Case Study"
       onKeyDown={(e) => { if (e.key === 'Enter' && onClick) onClick(); }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onClick={onClick}
-      className={`relative overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0A0A0A]/50 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 hover:border-white/[0.15] cursor-pointer group focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-4 focus:ring-offset-black ${className}`}
+      onMouseMove={handleMouseMove} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onClick={onClick}
+      className={`relative overflow-hidden rounded-3xl border backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-offset-4 ${className}`}
       style={{
+        borderColor: 'var(--border-subtle)',
+        background: 'var(--bg-card)',
         transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) translateY(${opacity > 0 ? '-4px' : '0'})`,
         transitionTimingFunction: BEZIER,
-      }}
-    >
-      <div
-        className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-300 z-10"
-        style={{
-          opacity,
-          background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(var(--accent-rgb),.08), transparent 40%)`,
-        }}
-      />
-
+      }}>
+      <div className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-300 z-10"
+        style={{ opacity, background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(var(--accent-rgb),.08), transparent 40%)` }} />
       {videoSrc && (
-        <video
-          ref={videoRef}
-          src={videoSrc}
-          loop
-          muted
-          playsInline
-          preload="metadata"
-          className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-all duration-700 z-[1] ${opacity > 0 ? 'opacity-100 scale-105' : 'opacity-0 scale-100'}`}
-        />
+        <video ref={videoRef} src={videoSrc} loop muted playsInline preload="metadata"
+          className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-all duration-700 z-[1] ${opacity > 0 ? 'opacity-100 scale-105' : 'opacity-0 scale-100'}`} />
       )}
-
       <div className="relative w-full h-full flex flex-col md:flex-row pointer-events-none">
-         {children}
+        {children}
       </div>
     </div>
   );
@@ -498,36 +408,27 @@ const IntroScreen = ({ onComplete }: { onComplete: () => void }) => {
   useEffect(() => {
     const t1 = setTimeout(() => setStage(1), 400);
     const t2 = setTimeout(() => setStage(2), 1800);
-    const t3 = setTimeout(() => {
-      setStage(3);
-      setTimeout(onComplete, 900);
-    }, 3200);
-
+    const t3 = setTimeout(() => { setStage(3); setTimeout(onComplete, 900); }, 3200);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [onComplete]);
 
   if (stage === 3) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 bg-black transition-opacity duration-700 ${stage === 2 ? 'opacity-0' : 'opacity-100'}`} style={{ transitionTimingFunction: BEZIER }}>
-      {/* 乱序摆放的巨大字母背景 */}
+    <div className={`fixed inset-0 z-50 transition-opacity duration-700 ${stage === 2 ? 'opacity-0' : 'opacity-100'}`}
+      style={{ transitionTimingFunction: BEZIER, background: 'var(--bg-primary)' }}>
+      {/* 乱序摆放的巨大字母背景 — 透明度提高 */}
       <div className="absolute inset-0 overflow-hidden">
-        <span
-          className={`absolute font-bold tracking-tighter text-white transition-all duration-1000 ${stage >= 1 ? 'opacity-[0.04] translate-y-0' : 'opacity-0 translate-y-12'}`}
-          style={{ transitionTimingFunction: BEZIER, fontSize: '42vw', left: '-5%', top: '-8%', lineHeight: 1 }}
-        >
+        <span className={`absolute font-bold tracking-tighter transition-all duration-1000 ${stage >= 1 ? 'opacity-[0.10] translate-y-0' : 'opacity-0 translate-y-12'}`}
+          style={{ transitionTimingFunction: BEZIER, fontSize: '42vw', left: '-5%', top: '-8%', lineHeight: 1, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
           L
         </span>
-        <span
-          className={`absolute font-bold tracking-tighter text-white transition-all duration-1000 delay-100 ${stage >= 1 ? 'opacity-[0.05] translate-y-0' : 'opacity-0 translate-y-12'}`}
-          style={{ transitionTimingFunction: BEZIER, fontSize: '38vw', right: '-8%', top: '5%', lineHeight: 1 }}
-        >
+        <span className={`absolute font-bold tracking-tighter transition-all duration-1000 delay-100 ${stage >= 1 ? 'opacity-[0.12] translate-y-0' : 'opacity-0 translate-y-12'}`}
+          style={{ transitionTimingFunction: BEZIER, fontSize: '38vw', right: '-8%', top: '5%', lineHeight: 1, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
           A
         </span>
-        <span
-          className={`absolute font-bold tracking-tighter text-white transition-all duration-1000 delay-200 ${stage >= 1 ? 'opacity-[0.035] translate-y-0' : 'opacity-0 translate-y-12'}`}
-          style={{ transitionTimingFunction: BEZIER, fontSize: '48vw', left: '25%', bottom: '-15%', lineHeight: 1 }}
-        >
+        <span className={`absolute font-bold tracking-tighter transition-all duration-1000 delay-200 ${stage >= 1 ? 'opacity-[0.09] translate-y-0' : 'opacity-0 translate-y-12'}`}
+          style={{ transitionTimingFunction: BEZIER, fontSize: '48vw', left: '25%', bottom: '-15%', lineHeight: 1, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
           Y
         </span>
       </div>
@@ -535,10 +436,8 @@ const IntroScreen = ({ onComplete }: { onComplete: () => void }) => {
       {/* 左下角 Hi, I'm Lay */}
       <div className="absolute left-8 bottom-12 md:left-16 md:bottom-20">
         <div className="overflow-hidden">
-          <p
-            className={`text-white text-xl md:text-2xl font-medium tracking-tight transition-transform duration-700 delay-500 ${stage >= 1 ? 'translate-y-0' : 'translate-y-full'}`}
-            style={{ transitionTimingFunction: BEZIER }}
-          >
+          <p className={`font-medium tracking-tight transition-transform duration-700 delay-500 ${stage >= 1 ? 'translate-y-0' : 'translate-y-full'}`}
+            style={{ transitionTimingFunction: BEZIER, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)' }}>
             Hi, I&rsquo;m Lay
           </p>
         </div>
@@ -547,9 +446,16 @@ const IntroScreen = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-const NavBar = ({ onLogoClick }: { onLogoClick: () => void }) => {
+const ThemeToggle = ({ isLight, onToggle }: { isLight: boolean; onToggle: () => void }) => (
+  <button onClick={onToggle} aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+    className="w-9 h-9 flex items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 hover:scale-110 focus:outline-none"
+    style={{ background: 'var(--bg-card-5)', borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}>
+    {isLight ? <Moon size={16} /> : <Sun size={16} />}
+  </button>
+);
+
+const NavBar = ({ onLogoClick, isLight, onToggleTheme }: { onLogoClick: () => void; isLight: boolean; onToggleTheme: () => void }) => {
   const [scrolled, setScrolled] = useState(false);
-  const { isSilverBlue } = useContext(ThemeContext);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -557,27 +463,31 @@ const NavBar = ({ onLogoClick }: { onLogoClick: () => void }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const scrollTo = (id: string) => { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); };
 
   return (
-    <nav className={`fixed top-6 left-1/2 -translate-x-1/2 z-40 transition-all duration-500 ${scrolled ? 'w-[90%] md:w-[400px]' : 'w-[90%] md:w-[480px]'}`}>
-      <div className="flex items-center justify-between px-6 py-3 rounded-full border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl transition-colors duration-1000">
-        <button 
-          className="text-white font-medium tracking-tight cursor-pointer relative focus:outline-none" 
-          onClick={() => {
-            window.scrollTo({top:0, behavior:'smooth'});
-            onLogoClick();
-          }}
-        >
+    <nav className={`fixed top-6 left-1/2 -translate-x-1/2 z-40 transition-all duration-500 ${scrolled ? 'w-[92%] md:w-[440px]' : 'w-[92%] md:w-[520px]'}`}>
+      <div className="flex items-center justify-between px-5 py-3 rounded-full border backdrop-blur-xl shadow-2xl transition-colors duration-1000"
+        style={{ background: 'var(--bg-nav)', borderColor: 'var(--border-subtle)' }}>
+        <button className="font-medium tracking-tight cursor-pointer relative focus:outline-none"
+          style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}
+          onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); onLogoClick(); }}>
           Lay
-          <span className={`absolute -top-1 -right-2.5 w-1.5 h-1.5 rounded-full transition-all duration-1000 ${isSilverBlue ? 'bg-[rgb(var(--accent-rgb))] shadow-[0_0_8px_rgb(var(--accent-rgb))] opacity-100' : 'opacity-0'}`}></span>
+          <span className={`absolute -top-1 -right-2.5 w-1.5 h-1.5 rounded-full transition-all duration-1000 ${isLight ? 'opacity-100' : 'opacity-0'}`}
+            style={{ background: 'var(--accent-color)', boxShadow: '0 0 8px var(--accent-color)' }} />
         </button>
-        <div className="flex gap-6 text-sm text-[#8F8F8F]">
-          <button onClick={() => scrollTo('works')} className="hover:text-white transition-colors focus:outline-none">Works</button>
-          <button onClick={() => scrollTo('process')} className="hover:text-white transition-colors focus:outline-none">Process</button>
-          <button onClick={() => scrollTo('about')} className="hover:text-white transition-colors focus:outline-none">About</button>
+        <div className="flex items-center gap-5 text-sm" style={{ color: 'var(--text-secondary)' }}>
+          <button onClick={() => scrollTo('works')} className="hover:transition-colors focus:outline-none" style={{ ['--tw-text-opacity' as string]: 1, color: 'var(--text-secondary)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>Works</button>
+          <button onClick={() => scrollTo('process')} className="hover:transition-colors focus:outline-none"
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>Process</button>
+          <button onClick={() => scrollTo('about')} className="hover:transition-colors focus:outline-none"
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>About</button>
+          <div className="w-px h-4" style={{ background: 'var(--border-subtle)' }} />
+          <ThemeToggle isLight={isLight} onToggle={onToggleTheme} />
         </div>
       </div>
     </nav>
@@ -586,8 +496,6 @@ const NavBar = ({ onLogoClick }: { onLogoClick: () => void }) => {
 
 const ProjectModal = ({ project, onClose }: { project: any, onClose: () => void }) => {
   const [isVisible, setIsVisible] = useState(false);
-  
-  // 优化点 5：支持移动端手势下拉阻尼关闭
   const [dragY, setDragY] = useState(0);
   const startY = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -605,427 +513,255 @@ const ProjectModal = ({ project, onClose }: { project: any, onClose: () => void 
   }, [project]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    // 只有在内容位于顶部时才允许拖拽整个 Modal
     if (scrollRef.current && scrollRef.current.scrollTop > 0) return;
     startY.current = e.touches[0].clientY;
   };
-
   const handleTouchMove = (e: React.TouchEvent) => {
-    const currentY = e.touches[0].clientY;
-    const deltaY = currentY - startY.current;
+    const deltaY = e.touches[0].clientY - startY.current;
     if (deltaY > 0 && (!scrollRef.current || scrollRef.current.scrollTop <= 0)) {
-       // 制造阻尼感 (Damping)
-       setDragY(deltaY * 0.4); 
+      setDragY(deltaY * 0.4);
     }
   };
-
   const handleTouchEnd = () => {
-    if (dragY > 100) {
-      setIsVisible(false); // 提前触发退出动画
-      setTimeout(onClose, 300);
-    } else {
-      setDragY(0); // 回弹
-    }
+    if (dragY > 100) { setIsVisible(false); setTimeout(onClose, 300); }
+    else { setDragY(0); }
   };
 
   if (!project) return null;
 
   return (
-    <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center p-0 md:p-8 transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${isVisible ? 'opacity-100 backdrop-blur-xl bg-black/60' : 'opacity-0 backdrop-blur-none bg-black/0'}`}
-    >
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-0 md:p-8 transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+      style={{ background: 'var(--modal-backdrop)', backdropFilter: isVisible ? 'blur(24px)' : 'blur(0px)' }}>
       <div className="absolute inset-0 cursor-pointer hidden md:block" onClick={onClose} />
-      
-      <div 
-        ref={scrollRef}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        className={`relative w-full h-full md:h-auto md:max-w-5xl md:max-h-[90vh] overflow-y-auto bg-[#0a0a0a] border border-white/10 md:rounded-3xl shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${isVisible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-16 scale-95 opacity-0'}`}
-        style={{
-           transform: dragY > 0 ? `translateY(${dragY}px) scale(${1 - dragY/3000})` : '',
-           transition: dragY > 0 ? 'none' : undefined
-        }}
-      >
-        <button 
-          aria-label="Close Project Modal"
-          onClick={onClose}
-          className="sticky top-6 left-[calc(100%-1rem)] md:left-[calc(100%-3rem)] -translate-x-full md:translate-x-0 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20 transition-colors border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-white"
-        >
+      <div ref={scrollRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
+        className={`relative w-full h-full md:h-auto md:max-w-5xl md:max-h-[90vh] overflow-y-auto border md:rounded-3xl shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${isVisible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-16 scale-95 opacity-0'}`}
+        style={{ background: 'var(--modal-bg)', borderColor: 'var(--border-subtle)', transform: dragY > 0 ? `translateY(${dragY}px) scale(${1 - dragY/3000})` : '', transition: dragY > 0 ? 'none' : undefined }}>
+        <button aria-label="Close Project Modal" onClick={onClose}
+          className="sticky top-6 left-[calc(100%-1rem)] md:left-[calc(100%-3rem)] -translate-x-full md:translate-x-0 z-20 w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md hover:transition-colors border focus:outline-none focus:ring-2"
+          style={{ background: 'var(--bg-card-5)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
           <X size={18} />
         </button>
 
         <article className="p-6 md:p-16 pt-12 md:pt-16">
           <header className="mb-16">
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-4 leading-tight">{project.title}</h2>
-            <p className="text-xl text-[#8F8F8F] mb-2">{project.enSubtitle}</p>
-            <p className="text-lg text-white/60 mb-8">{project.cnSubtitle}</p>
-            
+            <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-4 leading-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{project.title}</h2>
+            <p className="text-xl mb-2" style={{ color: 'var(--text-secondary)' }}>{project.enSubtitle}</p>
+            <p className="text-lg mb-8" style={{ color: 'var(--text-primary-60)' }}>{project.cnSubtitle}</p>
             <div className="flex flex-wrap gap-2 mb-8">
               {project.tags.map((tag: string) => (
-                <span key={tag} className="px-3 py-1 rounded-full border border-white/10 text-xs font-mono text-[#8F8F8F]">{tag}</span>
+                <span key={tag} className="px-3 py-1 rounded-full border text-xs font-mono" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}>{tag}</span>
               ))}
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-white/10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8" style={{ borderTop: '1px solid var(--border-subtle)' }}>
               <div>
-                <h4 className="text-xs uppercase tracking-widest text-[#474747] mb-2">My Role</h4>
+                <h4 className="text-xs uppercase tracking-widest mb-2" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>My Role</h4>
                 <div className="flex flex-col gap-1">
                   {project.roles.map((role: string) => (
-                    <span key={role} className="text-sm text-white/80">{role}</span>
+                    <span key={role} className="text-sm" style={{ color: 'var(--text-primary-80)' }}>{role}</span>
                   ))}
                 </div>
               </div>
               <div>
-                <h4 className="text-xs uppercase tracking-widest text-[#474747] mb-2">TL;DR</h4>
-                <p className="text-sm text-white/80 leading-relaxed">{project.summary}</p>
+                <h4 className="text-xs uppercase tracking-widest mb-2" style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>TL;DR</h4>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary-80)' }}>{project.summary}</p>
               </div>
             </div>
           </header>
 
-          <figure className="w-full aspect-video rounded-2xl border border-white/5 mb-16 relative overflow-hidden bg-black shadow-2xl">
-             <img 
-                src={project.cover} 
-                alt={`${project.title} Cover`} 
-                className="w-full h-full object-cover" 
-             />
+          <figure className="w-full aspect-video rounded-2xl border mb-16 relative overflow-hidden shadow-2xl" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-primary)' }}>
+            <img src={project.cover} alt={`${project.title} Cover`} className="w-full h-full object-cover" />
           </figure>
 
           <ImageGallery images={project.gallery?.filter((img: string) => img !== project.cover)} />
 
-          {/* 优化点 6：运用 Editorial 社论风格进行数据排版，模拟 MDX 文档质感 */}
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 border-t border-white/5 pt-16">
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 pt-16" style={{ borderTop: '1px solid var(--border-subtle)' }}>
             <div className="md:col-span-1">
-              <h3 className="text-2xl font-medium text-white tracking-tight sticky top-6">The Story</h3>
+              <h3 className="text-2xl font-medium tracking-tight sticky top-6" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>The Story</h3>
             </div>
             <div className="md:col-span-2 space-y-12">
-              <div className="pl-6 border-l border-white/10">
-                <h4 className="text-sm font-mono tracking-widest text-white/40 mb-4 uppercase">Why this project</h4>
-                <p className="text-white/90 text-lg leading-relaxed">{project.story.why}</p>
+              <div className="pl-6" style={{ borderLeft: '1px solid var(--border-subtle)' }}>
+                <h4 className="text-sm font-mono tracking-widest mb-4 uppercase" style={{ color: 'var(--text-primary-40)' }}>Why this project</h4>
+                <p className="text-lg leading-relaxed" style={{ color: 'var(--text-primary-90)' }}>{project.story.why}</p>
               </div>
-              <div className="pl-6 border-l border-white/10">
-                <h4 className="text-sm font-mono tracking-widest text-white/40 mb-4 uppercase">The Problem</h4>
-                <p className="text-white/90 text-lg leading-relaxed">{project.story.problem}</p>
+              <div className="pl-6" style={{ borderLeft: '1px solid var(--border-subtle)' }}>
+                <h4 className="text-sm font-mono tracking-widest mb-4 uppercase" style={{ color: 'var(--text-primary-40)' }}>The Problem</h4>
+                <p className="text-lg leading-relaxed" style={{ color: 'var(--text-primary-90)' }}>{project.story.problem}</p>
               </div>
             </div>
           </section>
 
-          <section className="mb-16 border-t border-white/5 pt-16">
-            <h3 className="text-2xl font-medium text-white tracking-tight mb-8">Process</h3>
+          <section className="mb-16 pt-16" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+            <h3 className="text-2xl font-medium tracking-tight mb-8" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Process</h3>
             <div className="flex flex-col md:flex-row gap-4">
               {project.process.map((step: string, idx: number) => (
-                <div key={idx} className="flex-1 p-6 rounded-2xl bg-white/5 border border-white/5 relative overflow-hidden">
-                  <span className="text-[120px] font-bold text-white/[0.02] absolute -top-8 -right-4 pointer-events-none">{idx + 1}</span>
-                  <span className="text-xs font-mono text-[#474747] mb-4 block">STEP 0{idx + 1}</span>
-                  <p className="text-base text-white/80 font-medium relative z-10">{step}</p>
+                <div key={idx} className="flex-1 p-6 rounded-2xl border relative overflow-hidden" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}>
+                  <span className="text-[120px] font-bold absolute -top-8 -right-4 pointer-events-none" style={{ color: 'var(--text-primary)', opacity: 0.02 }}>{idx + 1}</span>
+                  <span className="text-xs font-mono mb-4 block" style={{ color: 'var(--text-muted)' }}>STEP 0{idx + 1}</span>
+                  <p className="text-base font-medium relative z-10" style={{ color: 'var(--text-primary-80)' }}>{step}</p>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 border-t border-white/5 pt-16">
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 pt-16" style={{ borderTop: '1px solid var(--border-subtle)' }}>
             <div className="md:col-span-1">
-              <h3 className="text-2xl font-medium text-white tracking-tight sticky top-6">Design System</h3>
+              <h3 className="text-2xl font-medium tracking-tight sticky top-6" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Design System</h3>
             </div>
             <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-8 rounded-2xl border border-white/10 bg-black/50 hover:bg-white/[0.02] transition-colors md:col-span-2">
-                <h4 className="text-sm text-white/40 font-mono tracking-widest uppercase mb-3">Interaction Logic</h4>
-                <p className="text-white/90 text-base leading-relaxed">{project.designDetail.interaction}</p>
+              <div className="p-8 rounded-2xl border transition-colors md:col-span-2" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}>
+                <h4 className="text-sm font-mono tracking-widest uppercase mb-3" style={{ color: 'var(--text-primary-40)' }}>Interaction Logic</h4>
+                <p className="text-base leading-relaxed" style={{ color: 'var(--text-primary-90)' }}>{project.designDetail.interaction}</p>
               </div>
-              <div className="p-8 rounded-2xl border border-white/10 bg-black/50 hover:bg-white/[0.02] transition-colors">
-                <h4 className="text-sm text-white/40 font-mono tracking-widest uppercase mb-3">Architecture</h4>
-                <p className="text-white/90 text-sm leading-relaxed">{project.designDetail.architecture}</p>
+              <div className="p-8 rounded-2xl border transition-colors" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}>
+                <h4 className="text-sm font-mono tracking-widest uppercase mb-3" style={{ color: 'var(--text-primary-40)' }}>Architecture</h4>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary-90)' }}>{project.designDetail.architecture}</p>
               </div>
-              <div className="p-8 rounded-2xl border border-white/10 bg-black/50 hover:bg-white/[0.02] transition-colors">
-                <h4 className="text-sm text-white/40 font-mono tracking-widest uppercase mb-3">Visual Style</h4>
-                <p className="text-white/90 text-sm leading-relaxed">{project.designDetail.visual}</p>
+              <div className="p-8 rounded-2xl border transition-colors" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}>
+                <h4 className="text-sm font-mono tracking-widest uppercase mb-3" style={{ color: 'var(--text-primary-40)' }}>Visual Style</h4>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary-90)' }}>{project.designDetail.visual}</p>
               </div>
             </div>
           </section>
 
-          <section className="p-8 md:p-16 rounded-3xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 text-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--accent-rgb),0.05)_0%,transparent_70%)] pointer-events-none" />
-            <h3 className="text-sm uppercase tracking-widest text-[#474747] mb-8 font-mono">Reflection</h3>
-            <p className="text-xl md:text-2xl text-white/90 leading-relaxed font-serif italic max-w-4xl mx-auto relative z-10">
-              "{project.reflection}"
+          <section className="p-8 md:p-16 rounded-3xl border text-center relative overflow-hidden"
+            style={{ background: 'linear-gradient(to bottom right, var(--bg-card-5), transparent)', borderColor: 'var(--border-subtle)' }}>
+            <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at center, rgba(var(--accent-rgb),0.05) 0%, transparent 70%)' }} />
+            <h3 className="text-sm uppercase tracking-widest mb-8 font-mono" style={{ color: 'var(--text-muted)' }}>Reflection</h3>
+            <p className="text-xl md:text-2xl leading-relaxed font-serif italic max-w-4xl mx-auto relative z-10" style={{ color: 'var(--text-primary-90)' }}>
+              &ldquo;{project.reflection}&rdquo;
             </p>
           </section>
-
         </article>
       </div>
     </div>
   );
 };
 
-// --- Main Application ---
+// ── Main Page ──
 
 export default function PortfolioPage() {
   const [introDone, setIntroDone] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
-  
   const [clickCount, setClickCount] = useState(0);
-  const [isSilverBlue, setIsSilverBlue] = useState(false);
+  const { isLight, toggle } = useTheme();
 
   const handleLogoClick = useCallback(() => {
     setClickCount(c => c + 1);
-    if (clickCount >= 4) { 
-       setIsSilverBlue(prev => !prev);
-       setClickCount(0);
-       // 优化点 7：结合 Web API 植入细腻触觉反馈，打造高级彩蛋交互
-       if (typeof navigator !== 'undefined' && navigator.vibrate) {
-          navigator.vibrate([15, 30, 15]);
-       }
+    if (clickCount >= 4) {
+      toggle();
+      setClickCount(0);
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([15, 30, 15]);
+      }
     }
-  }, [clickCount]);
-
-  const theme = { isSilverBlue };
+  }, [clickCount, toggle]);
 
   useEffect(() => {
-    if (!introDone) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-      window.scrollTo(0, 0);
-    }
+    if (!introDone) { document.body.style.overflow = 'hidden'; }
+    else { document.body.style.overflow = ''; window.scrollTo(0, 0); }
   }, [introDone]);
 
   return (
-    <ThemeContext.Provider value={theme}>
-      <style>{`
-        :root {
-          --accent-rgb: ${isSilverBlue ? '168, 192, 216' : '255, 255, 255'};
-        }
-        ::selection {
-          background-color: rgba(var(--accent-rgb), 0.3);
-          color: white;
-        }
-        body {
-          background-color: black;
-          scroll-behavior: smooth;
-        }
-      `}</style>
-      <div className="min-h-screen bg-black text-white font-sans transition-colors duration-1000">
-        {!introDone && <IntroScreen onComplete={() => setIntroDone(true)} />}
-        <ProgressBar />
-        <NavBar onLogoClick={handleLogoClick} />
-        
-        <main className="relative z-10">
-          <section className="min-h-screen pt-24 pb-12 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-6 md:px-12 relative overflow-hidden">
-            <div className="w-full md:w-1/2 z-20 pt-20 md:pt-0">
-              <Reveal delay={200}>
-                <div className="mb-8">
-                  <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white mb-1">刘安烨</h2>
-                  <span className="text-sm font-mono tracking-wider text-[#8F8F8F]">AI Agent UI Designer</span>
-                </div>
-              </Reveal>
+    <div className="min-h-screen transition-colors duration-1000" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+      {!introDone && <IntroScreen onComplete={() => setIntroDone(true)} />}
+      <ProgressBar />
+      <NavBar onLogoClick={handleLogoClick} isLight={isLight} onToggleTheme={toggle} />
 
-              <Reveal delay={400}>
-                <h1 className="text-4xl md:text-6xl font-bold tracking-tighter leading-[1.1] mb-8">
-                  Designing interfaces for <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-[#474747] transition-all duration-1000" style={isSilverBlue ? { backgroundImage: 'linear-gradient(to right, rgb(var(--accent-rgb)), #474747)' } : {}}>AI Agent products</span>.
-                </h1>
-              </Reveal>
-
-              <Reveal delay={600}>
-                <p className="text-lg md:text-xl text-white/80 mb-4 font-medium leading-relaxed">
-                  我擅长把 AI 项目从概念、逻辑、视觉到前端原型完整设计出来。
-                </p>
-                <p className="text-sm md:text-base text-[#474747] leading-relaxed max-w-lg mb-12">
-                  设计训练让我对视觉秩序、叙事路径和体验节奏更敏感；AI 与前端实践让我理解产品背后的流程、模型能力和工程边界。
-                </p>
-              </Reveal>
-
-              <Reveal delay={800}>
-                <div className="flex flex-wrap gap-4">
-                  <button onClick={() => document.getElementById('works')?.scrollIntoView({behavior:'smooth'})} className="px-6 py-3 rounded-full bg-white text-black font-medium text-sm hover:bg-white/90 transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black">
-                    View Works <ArrowRight size={16} />
-                  </button>
-                  <button onClick={() => document.getElementById('process')?.scrollIntoView({behavior:'smooth'})} className="px-6 py-3 rounded-full bg-transparent border border-white/20 text-white font-medium text-sm hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black">
-                    My Process
-                  </button>
-                  <button onClick={() => document.getElementById('contact')?.scrollIntoView({behavior:'smooth'})} className="px-6 py-3 rounded-full bg-transparent border border-white/20 text-white font-medium text-sm hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black">
-                    Contact
-                  </button>
-                </div>
-              </Reveal>
-            </div>
-
-            {/* 右侧人像照片背景 */}
-            <div className="absolute right-0 top-0 h-full w-full md:w-[55%] lg:w-[50%] pointer-events-none z-0 hidden md:block">
-              <img
-                src="/home-portrait-bg.jpg"
-                alt="Lay Liu Portrait"
-                className="w-full h-full object-cover object-top opacity-40"
-              />
-              {/* 左侧渐变遮罩，让照片与黑色背景自然过渡 */}
-              <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-black via-black/80 to-transparent" />
-              {/* 底部渐变遮罩 */}
-              <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-black to-transparent" />
-            </div>
-          </section>
-
-          <section className="py-24 md:py-32 bg-[#050505] relative border-t border-white/5">
-            <div className="max-w-7xl mx-auto px-6 md:px-12">
-              <Reveal>
-                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">From concept to prototype.</h2>
-                <p className="text-lg text-[#8F8F8F] mb-6">从概念到可交互原型。</p>
-                <div className="max-w-3xl text-[#8F8F8F] text-sm md:text-base leading-relaxed mb-16 space-y-4">
-                  <p>我关注的不是"AI 能不能生成结果"，而是一个复杂 AI 项目如何被用户理解、操作、判断和记住。</p>
-                  <p>设计训练让我对视觉秩序、叙事路径和体验节奏更敏感；AI 与前端实践让我理解产品背后的流程、模型能力和工程边界。</p>
-                </div>
-              </Reveal>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Reveal delay={100}>
-                  <div className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/[0.08] transition-colors group">
-                    <Layout className="w-8 h-8 text-white/50 mb-6 group-hover:text-white transition-colors" />
-                    <h3 className="text-xl font-medium mb-3">Interface Design</h3>
-                    <p className="text-sm text-[#8F8F8F]">把复杂任务变成清晰界面。</p>
-                  </div>
-                </Reveal>
-                <Reveal delay={200}>
-                  <div className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/[0.08] transition-colors group">
-                    <Workflow className="w-8 h-8 text-white/50 mb-6 group-hover:text-white transition-colors" />
-                    <h3 className="text-xl font-medium mb-3">AI Workflow</h3>
-                    <p className="text-sm text-[#8F8F8F]">把模糊想法变成可执行流程。</p>
-                  </div>
-                </Reveal>
-                <Reveal delay={300}>
-                  <div className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/[0.08] transition-colors group">
-                    <MonitorSmartphone className="w-8 h-8 text-white/50 mb-6 group-hover:text-white transition-colors" />
-                    <h3 className="text-xl font-medium mb-3">AIGC Visual System</h3>
-                    <p className="text-sm text-[#8F8F8F]">把 AI 生成结果变成统一视觉语言。</p>
-                  </div>
-                </Reveal>
+      <main className="relative z-10">
+        {/* ═══════════════════════════════════════════════════════════
+            HERO
+            ═══════════════════════════════════════════════════════════ */}
+        <section className="min-h-screen pt-24 pb-12 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-6 md:px-12 relative overflow-hidden">
+          <div className="w-full md:w-1/2 z-20 pt-20 md:pt-0">
+            <Reveal delay={200}>
+              <div className="mb-6">
+                <h2 className="font-bold tracking-tight mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(2rem, 4vw, 3.5rem)', lineHeight: 1.1 }}>
+                  刘安烨
+                </h2>
+                <span className="text-sm font-mono tracking-wider" style={{ color: 'var(--text-secondary)' }}>AI Agent UI Designer</span>
               </div>
-            </div>
-          </section>
-
-        <section id="works" className="py-24 md:py-32 relative">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.03),transparent_50%)] pointer-events-none" />
-          <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-            <Reveal>
-              <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">Selected Works</h2>
-              <p className="text-lg md:text-xl text-[#8F8F8F] mb-2">Four projects that define my current direction.</p>
-              <p className="text-sm text-[#474747] mb-16">四个项目，构成我目前的 AI 设计方向。</p>
             </Reveal>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 auto-rows-[400px]">
+            <Reveal delay={400}>
+              <h1 className="font-bold tracking-tight leading-[1.15] mb-6" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(1.75rem, 3.5vw, 3rem)' }}>
+                Designing interfaces for{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r transition-all duration-1000"
+                  style={{ backgroundImage: `linear-gradient(to right, var(--text-primary), var(--text-muted))` }}>
+                  AI Agent products
+                </span>.
+              </h1>
+            </Reveal>
 
-              <Reveal className="md:col-span-2 h-full">
-                <SpotlightCard videoSrc={PROJECTS[0].video} className="h-full group" onClick={() => setSelectedProject(PROJECTS[0])}>
-                  <div className="p-8 md:p-12 w-full md:w-1/2 flex flex-col justify-center z-20 transition-transform duration-500 group-hover:translate-x-2">
-                    <h3 className="text-3xl font-bold mb-2 tracking-tight group-hover:text-white text-white/90 transition-colors">{PROJECTS[0].title}</h3>
-                    <p className="text-sm text-[#8F8F8F] mb-6">{PROJECTS[0].enSubtitle}</p>
-                    <p className="text-sm text-white/70 leading-relaxed mb-8">{PROJECTS[0].summary}</p>
-                    <div className="mt-auto flex items-center text-xs font-mono text-white/50 group-hover:text-white transition-colors">
-                      View Case Study <ChevronRight size={14} className="ml-1" />
-                    </div>
-                  </div>
-                  <div className="w-full md:w-1/2 h-full absolute right-0 top-0 overflow-hidden bg-black border-l border-white/5">
-                     <img
-                        src={PROJECTS[0].cover}
-                        alt={PROJECTS[0].title}
-                        className={`absolute inset-0 w-full h-full object-cover object-right transition-all duration-1000 ease-out opacity-70 ${PROJECTS[0].video ? 'group-hover:opacity-0' : 'group-hover:scale-105 group-hover:opacity-100'}`}
-                     />
-                     <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-transparent md:bg-gradient-to-r md:from-[#0A0A0A] md:via-[#0A0A0A]/80 md:to-transparent z-[2] pointer-events-none"></div>
-                  </div>
-                </SpotlightCard>
-              </Reveal>
+            <Reveal delay={600}>
+              <p className="font-medium leading-relaxed mb-3" style={{ color: 'var(--text-primary-80)', fontSize: 'clamp(1rem, 1.8vw, 1.25rem)' }}>
+                擅长把 AI 项目从概念、逻辑、视觉到前端原型完整设计出来。
+              </p>
+              <p className="leading-relaxed max-w-lg mb-12" style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.8125rem, 1.2vw, 1rem)' }}>
+                设计训练让我对视觉秩序、叙事路径和体验节奏更敏感；AI 与前端实践让我理解产品背后的流程、模型能力和工程边界。
+              </p>
+            </Reveal>
 
-              <Reveal className="h-full">
-                <SpotlightCard videoSrc={PROJECTS[1].video} className="h-full flex-col group" onClick={() => setSelectedProject(PROJECTS[1])}>
-                  <div className="h-1/2 w-full absolute top-0 left-0 overflow-hidden bg-black border-b border-white/5">
-                     <img
-                        src={PROJECTS[1].cover}
-                        alt={PROJECTS[1].title}
-                        className={`w-full h-full object-cover object-center transition-all duration-1000 ease-out ${PROJECTS[1].video ? 'opacity-80 group-hover:opacity-0' : 'group-hover:scale-105 group-hover:opacity-100 opacity-80'}`}
-                     />
-                     <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] to-transparent opacity-90 z-[2] pointer-events-none"></div>
-                  </div>
-                  <div className="p-8 flex flex-col w-full h-full justify-end z-20">
-                    <h3 className="text-2xl font-bold mb-2 tracking-tight group-hover:text-white text-white/90">{PROJECTS[1].title}</h3>
-                    <p className="text-xs text-[#8F8F8F] mb-4">{PROJECTS[1].enSubtitle}</p>
-                    <p className="text-sm text-white/70 leading-relaxed line-clamp-3">{PROJECTS[1].summary}</p>
-                    <div className="mt-4 flex items-center text-xs font-mono text-white/50 group-hover:text-white transition-colors">
-                      View Case Study <ChevronRight size={14} className="ml-1" />
-                    </div>
-                  </div>
-                </SpotlightCard>
-              </Reveal>
+            <Reveal delay={800}>
+              <div className="flex flex-wrap gap-3">
+                <button onClick={() => document.getElementById('works')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="px-6 py-3 rounded-full font-medium text-sm hover:opacity-90 transition-all flex items-center gap-2 focus:outline-none focus:ring-2"
+                  style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', fontFamily: 'var(--font-text)' }}>
+                  View Works <ArrowRight size={16} />
+                </button>
+                <button onClick={() => document.getElementById('process')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="px-6 py-3 rounded-full font-medium text-sm hover:transition-colors focus:outline-none focus:ring-2"
+                  style={{ background: 'var(--btn-secondary-bg)', border: '1px solid var(--btn-secondary-border)', color: 'var(--btn-secondary-text)' }}>
+                  My Process
+                </button>
+                <button onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="px-6 py-3 rounded-full font-medium text-sm hover:transition-colors focus:outline-none focus:ring-2"
+                  style={{ background: 'var(--btn-secondary-bg)', border: '1px solid var(--btn-secondary-border)', color: 'var(--btn-secondary-text)' }}>
+                  Contact
+                </button>
+              </div>
+            </Reveal>
+          </div>
 
-              <Reveal className="h-full">
-                <SpotlightCard videoSrc={PROJECTS[2].video} className="h-full flex-col group" onClick={() => setSelectedProject(PROJECTS[2])}>
-                  <div className="h-1/2 w-full absolute top-0 left-0 overflow-hidden bg-black border-b border-white/5">
-                     <img
-                        src={PROJECTS[2].cover}
-                        alt={PROJECTS[2].title}
-                        className={`w-full h-full object-cover object-center transition-all duration-1000 ${PROJECTS[2].video ? 'opacity-80 group-hover:opacity-0' : 'group-hover:opacity-100 group-hover:scale-105 opacity-80'}`}
-                     />
-                     <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] to-transparent opacity-90 z-[2] pointer-events-none"></div>
-                  </div>
-                  <div className="p-8 flex flex-col w-full h-full justify-end z-20">
-                    <h3 className="text-2xl font-bold mb-2 tracking-tight group-hover:text-white text-white/90">{PROJECTS[2].title}</h3>
-                    <p className="text-xs text-[#8F8F8F] mb-4">{PROJECTS[2].enSubtitle}</p>
-                    <p className="text-sm text-white/70 leading-relaxed line-clamp-3">{PROJECTS[2].summary}</p>
-                    <div className="mt-4 flex items-center text-xs font-mono text-white/50 group-hover:text-white transition-colors">
-                      View Case Study <ChevronRight size={14} className="ml-1" />
-                    </div>
-                  </div>
-                </SpotlightCard>
-              </Reveal>
-
-              <Reveal className="md:col-span-2 h-[300px]">
-                <SpotlightCard videoSrc={PROJECTS[3].video} className="h-full flex-row group" onClick={() => setSelectedProject(PROJECTS[3])}>
-                   <div className="w-full md:w-1/3 h-full absolute left-0 top-0 bg-black border-r border-white/5 overflow-hidden">
-                      <img
-                         src={PROJECTS[3].cover}
-                         alt={PROJECTS[3].title}
-                         className={`absolute inset-0 w-full h-full object-cover object-[75%_center] transition-all duration-1000 ease-out ${PROJECTS[3].video ? 'opacity-80 group-hover:opacity-0' : 'group-hover:scale-105 group-hover:opacity-100 opacity-80'}`}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/80 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:via-[#0A0A0A]/60 md:to-[#0A0A0A] z-[2] pointer-events-none"></div>
-                   </div>
-                   <div className="p-8 md:p-12 w-full md:w-2/3 md:ml-auto h-full flex flex-col justify-center z-20 transition-transform duration-500 group-hover:-translate-x-2">
-                    <h3 className="text-2xl font-bold mb-2 tracking-tight group-hover:text-white text-white/90">{PROJECTS[3].title}</h3>
-                    <p className="text-sm text-[#8F8F8F] mb-4">{PROJECTS[3].enSubtitle}</p>
-                    <p className="text-sm text-white/70 leading-relaxed max-w-lg">{PROJECTS[3].summary}</p>
-                    <div className="mt-6 flex items-center text-xs font-mono text-white/50 group-hover:text-white transition-colors">
-                      View Case Study <ChevronRight size={14} className="ml-1" />
-                    </div>
-                  </div>
-                </SpotlightCard>
-              </Reveal>
-
-            </div>
+          {/* 右侧人像照片背景 */}
+          <div className="absolute right-0 top-0 h-full w-full md:w-[55%] lg:w-[50%] pointer-events-none z-0 hidden md:block">
+            <img src="/home-portrait-bg.jpg" alt="Lay Liu Portrait" className="w-full h-full object-cover object-top" style={{ opacity: 0.4 }} />
+            <div className="absolute inset-y-0 left-0 w-1/2" style={{ background: 'linear-gradient(to right, var(--bg-primary), transparent)' }} />
+            <div className="absolute bottom-0 left-0 right-0 h-1/4" style={{ background: 'linear-gradient(to top, var(--bg-primary), transparent)' }} />
           </div>
         </section>
 
-        <section id="process" className="py-24 md:py-32 bg-[#050505] border-t border-white/5">
+        {/* ═══════════════════════════════════════════════════════════
+            CAPABILITIES
+            ═══════════════════════════════════════════════════════════ */}
+        <section className="py-24 md:py-32 relative" style={{ background: 'var(--bg-secondary)' }}>
           <div className="max-w-7xl mx-auto px-6 md:px-12">
             <Reveal>
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">My Process</h2>
-              <p className="text-lg text-[#8F8F8F] mb-2">From concept to interactive prototype.</p>
-              <p className="text-sm text-[#474747] mb-16">从概念到可交互原型。</p>
+              <h2 className="font-bold tracking-tight mb-4" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(1.75rem, 3.5vw, 3rem)' }}>
+                From concept to prototype.
+              </h2>
+              <p className="text-lg mb-6" style={{ color: 'var(--text-secondary)' }}>从概念到可交互原型。</p>
+              <div className="max-w-3xl text-sm md:text-base leading-relaxed mb-16 space-y-4" style={{ color: 'var(--text-secondary)' }}>
+                <p>我关注的不是"AI 能不能生成结果"，而是一个复杂 AI 项目如何被用户理解、操作、判断和记住。</p>
+                <p>设计训练让我对视觉秩序、叙事路径和体验节奏更敏感；AI 与前端实践让我理解产品背后的流程、模型能力和工程边界。</p>
+              </div>
             </Reveal>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
-              <div className="hidden md:block absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-y-1/2 pointer-events-none" />
-
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { title: 'Decode', desc: '理解真实问题' },
-                { title: 'Structure', desc: '拆解流程与层级' },
-                { title: 'Visualize', desc: '转化为界面语言' },
-                { title: 'Prototype', desc: '完成前端原型' }
-              ].map((step, idx) => (
-                <Reveal key={step.title} delay={idx * 100} className="relative z-10">
-                  <div className="p-8 bg-black border border-white/10 rounded-3xl h-full flex flex-col group hover:border-white/30 transition-colors duration-500 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 text-[100px] font-bold text-white/[0.02] leading-none pointer-events-none group-hover:text-white/[0.05] transition-colors">
-                      {idx + 1}
-                    </div>
-                    <span className="text-xs font-mono tracking-widest text-[#474747] mb-6">STEP 0{idx + 1}</span>
-                    <h3 className="text-2xl font-bold mb-4 tracking-tight">{step.title}</h3>
-                    <p className="text-sm text-[#8F8F8F] leading-relaxed mt-auto group-hover:text-white/80 transition-colors">
-                      {step.desc}
-                    </p>
+                { icon: Layout, title: 'Interface Design', desc: '把复杂任务变成清晰界面。' },
+                { icon: Workflow, title: 'AI Workflow', desc: '把模糊想法变成可执行流程。' },
+                { icon: MonitorSmartphone, title: 'AIGC Visual System', desc: '把 AI 生成结果变成统一视觉语言。' },
+              ].map((item, idx) => (
+                <Reveal key={item.title} delay={(idx + 1) * 100}>
+                  <div className="p-8 rounded-3xl border backdrop-blur-md transition-colors group"
+                    style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-card-hover)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-card)')}>
+                    <item.icon className="w-8 h-8 mb-6 transition-colors" style={{ color: 'var(--text-tertiary)' }}
+                      onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+                      onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-tertiary)')} />
+                    <h3 className="text-xl font-medium mb-3" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{item.title}</h3>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item.desc}</p>
                   </div>
                 </Reveal>
               ))}
@@ -1033,29 +769,170 @@ export default function PortfolioPage() {
           </div>
         </section>
 
+        {/* ═══════════════════════════════════════════════════════════
+            WORKS
+            ═══════════════════════════════════════════════════════════ */}
+        <section id="works" className="py-24 md:py-32 relative">
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at top, rgba(var(--accent-rgb),0.03), transparent 50%)' }} />
+          <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+            <Reveal>
+              <h2 className="font-bold tracking-tight mb-4" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(2rem, 4.5vw, 3.75rem)' }}>
+                Selected Works
+              </h2>
+              <p className="text-lg md:text-xl mb-2" style={{ color: 'var(--text-secondary)' }}>Four projects that define my current direction.</p>
+              <p className="text-sm mb-16" style={{ color: 'var(--text-muted)' }}>四个项目，构成我目前的 AI 设计方向。</p>
+            </Reveal>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 auto-rows-[400px]">
+              {/* Project 01 — Large */}
+              <Reveal className="md:col-span-2 h-full">
+                <SpotlightCard videoSrc={PROJECTS[0].video} className="h-full group" onClick={() => setSelectedProject(PROJECTS[0])}>
+                  <div className="p-8 md:p-12 w-full md:w-1/2 flex flex-col justify-center z-20 transition-transform duration-500 group-hover:translate-x-2">
+                    <h3 className="text-3xl font-bold mb-2 tracking-tight transition-colors" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary-90)' }}>{PROJECTS[0].title}</h3>
+                    <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>{PROJECTS[0].enSubtitle}</p>
+                    <p className="text-sm leading-relaxed mb-8" style={{ color: 'var(--text-primary-70)' }}>{PROJECTS[0].summary}</p>
+                    <div className="mt-auto flex items-center text-xs font-mono transition-colors" style={{ color: 'var(--text-tertiary)' }}>
+                      View Case Study <ChevronRight size={14} className="ml-1" />
+                    </div>
+                  </div>
+                  <div className="w-full md:w-1/2 h-full absolute right-0 top-0 overflow-hidden border-l" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)' }}>
+                    <img src={PROJECTS[0].cover} alt={PROJECTS[0].title}
+                      className={`absolute inset-0 w-full h-full object-cover object-right transition-all duration-1000 ease-out ${PROJECTS[0].video ? 'opacity-70 group-hover:opacity-0' : 'group-hover:scale-105 opacity-70'}`} />
+                    <div className="absolute inset-0 z-[2] pointer-events-none"
+                      style={{ background: 'linear-gradient(to top, var(--bg-tertiary), transparent), linear-gradient(to right, var(--bg-tertiary), transparent 80%)' }} />
+                  </div>
+                </SpotlightCard>
+              </Reveal>
+
+              {/* Project 02 */}
+              <Reveal className="h-full">
+                <SpotlightCard videoSrc={PROJECTS[1].video} className="h-full flex-col group" onClick={() => setSelectedProject(PROJECTS[1])}>
+                  <div className="h-1/2 w-full absolute top-0 left-0 overflow-hidden border-b" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)' }}>
+                    <img src={PROJECTS[1].cover} alt={PROJECTS[1].title}
+                      className={`w-full h-full object-cover object-center transition-all duration-1000 ease-out ${PROJECTS[1].video ? 'opacity-80 group-hover:opacity-0' : 'group-hover:scale-105 opacity-80'}`} />
+                    <div className="absolute inset-0 z-[2] pointer-events-none" style={{ background: 'linear-gradient(to top, var(--bg-tertiary), transparent)', opacity: 0.9 }} />
+                  </div>
+                  <div className="p-8 flex flex-col w-full h-full justify-end z-20">
+                    <h3 className="text-2xl font-bold mb-2 tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary-90)' }}>{PROJECTS[1].title}</h3>
+                    <p className="text-xs mb-4" style={{ color: 'var(--text-secondary)' }}>{PROJECTS[1].enSubtitle}</p>
+                    <p className="text-sm leading-relaxed line-clamp-3" style={{ color: 'var(--text-primary-70)' }}>{PROJECTS[1].summary}</p>
+                    <div className="mt-4 flex items-center text-xs font-mono" style={{ color: 'var(--text-tertiary)' }}>
+                      View Case Study <ChevronRight size={14} className="ml-1" />
+                    </div>
+                  </div>
+                </SpotlightCard>
+              </Reveal>
+
+              {/* Project 03 */}
+              <Reveal className="h-full">
+                <SpotlightCard videoSrc={PROJECTS[2].video} className="h-full flex-col group" onClick={() => setSelectedProject(PROJECTS[2])}>
+                  <div className="h-1/2 w-full absolute top-0 left-0 overflow-hidden border-b" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)' }}>
+                    <img src={PROJECTS[2].cover} alt={PROJECTS[2].title}
+                      className={`w-full h-full object-cover object-center transition-all duration-1000 ${PROJECTS[2].video ? 'opacity-80 group-hover:opacity-0' : 'group-hover:scale-105 opacity-80'}`} />
+                    <div className="absolute inset-0 z-[2] pointer-events-none" style={{ background: 'linear-gradient(to top, var(--bg-tertiary), transparent)', opacity: 0.9 }} />
+                  </div>
+                  <div className="p-8 flex flex-col w-full h-full justify-end z-20">
+                    <h3 className="text-2xl font-bold mb-2 tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary-90)' }}>{PROJECTS[2].title}</h3>
+                    <p className="text-xs mb-4" style={{ color: 'var(--text-secondary)' }}>{PROJECTS[2].enSubtitle}</p>
+                    <p className="text-sm leading-relaxed line-clamp-3" style={{ color: 'var(--text-primary-70)' }}>{PROJECTS[2].summary}</p>
+                    <div className="mt-4 flex items-center text-xs font-mono" style={{ color: 'var(--text-tertiary)' }}>
+                      View Case Study <ChevronRight size={14} className="ml-1" />
+                    </div>
+                  </div>
+                </SpotlightCard>
+              </Reveal>
+
+              {/* Project 04 */}
+              <Reveal className="md:col-span-2 h-[300px]">
+                <SpotlightCard videoSrc={PROJECTS[3].video} className="h-full flex-row group" onClick={() => setSelectedProject(PROJECTS[3])}>
+                  <div className="w-full md:w-1/3 h-full absolute left-0 top-0 border-r overflow-hidden" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)' }}>
+                    <img src={PROJECTS[3].cover} alt={PROJECTS[3].title}
+                      className={`absolute inset-0 w-full h-full object-cover object-[75%_center] transition-all duration-1000 ease-out ${PROJECTS[3].video ? 'opacity-80 group-hover:opacity-0' : 'group-hover:scale-105 opacity-80'}`} />
+                    <div className="absolute inset-0 z-[2] pointer-events-none md:hidden" style={{ background: 'linear-gradient(to top, var(--bg-tertiary) 80%, transparent)' }} />
+                    <div className="absolute inset-0 z-[2] pointer-events-none hidden md:block" style={{ background: 'linear-gradient(to right, transparent, var(--bg-tertiary) 60%)' }} />
+                  </div>
+                  <div className="p-8 md:p-12 w-full md:w-2/3 md:ml-auto h-full flex flex-col justify-center z-20 transition-transform duration-500 group-hover:-translate-x-2">
+                    <h3 className="text-2xl font-bold mb-2 tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary-90)' }}>{PROJECTS[3].title}</h3>
+                    <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>{PROJECTS[3].enSubtitle}</p>
+                    <p className="text-sm leading-relaxed max-w-lg" style={{ color: 'var(--text-primary-70)' }}>{PROJECTS[3].summary}</p>
+                    <div className="mt-6 flex items-center text-xs font-mono" style={{ color: 'var(--text-tertiary)' }}>
+                      View Case Study <ChevronRight size={14} className="ml-1" />
+                    </div>
+                  </div>
+                </SpotlightCard>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════
+            PROCESS
+            ═══════════════════════════════════════════════════════════ */}
+        <section id="process" className="py-24 md:py-32" style={{ background: 'var(--bg-secondary)' }}>
+          <div className="max-w-7xl mx-auto px-6 md:px-12">
+            <Reveal>
+              <h2 className="font-bold tracking-tight mb-4" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(1.75rem, 3.5vw, 3rem)' }}>
+                My Process
+              </h2>
+              <p className="text-lg mb-2" style={{ color: 'var(--text-secondary)' }}>From concept to interactive prototype.</p>
+              <p className="text-sm mb-16" style={{ color: 'var(--text-muted)' }}>从概念到可交互原型。</p>
+            </Reveal>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+              <div className="hidden md:block absolute top-1/2 left-0 w-full h-[1px] pointer-events-none" style={{ background: 'linear-gradient(to right, transparent, var(--border-medium), transparent)', transform: 'translateY(-50%)' }} />
+              {[
+                { title: 'Decode', desc: '理解真实问题' },
+                { title: 'Structure', desc: '拆解流程与层级' },
+                { title: 'Visualize', desc: '转化为界面语言' },
+                { title: 'Prototype', desc: '完成前端原型' },
+              ].map((step, idx) => (
+                <Reveal key={step.title} delay={idx * 100} className="relative z-10">
+                  <div className="p-8 border rounded-3xl h-full flex flex-col group transition-colors duration-500 relative overflow-hidden"
+                    style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)' }}
+                    onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--border-medium)')}
+                    onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border-subtle)')}>
+                    <div className="absolute top-0 right-0 p-4 text-[100px] font-bold leading-none pointer-events-none" style={{ color: 'var(--text-primary)', opacity: 0.02 }}>{idx + 1}</div>
+                    <span className="text-xs font-mono tracking-widest mb-6" style={{ color: 'var(--text-muted)' }}>STEP 0{idx + 1}</span>
+                    <h3 className="text-2xl font-bold mb-4 tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{step.title}</h3>
+                    <p className="text-sm leading-relaxed mt-auto transition-colors" style={{ color: 'var(--text-secondary)' }}>{step.desc}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════
+            ABOUT
+            ═══════════════════════════════════════════════════════════ */}
         <section id="about" className="py-24 md:py-32 relative">
           <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-16">
             <Reveal>
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-12">About Lay</h2>
-              <div className="space-y-6 text-[#8F8F8F] text-base md:text-lg leading-relaxed">
-                <p className="text-white/70 font-medium">
+              <h2 className="font-bold tracking-tight mb-12" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(1.75rem, 3.5vw, 3rem)' }}>
+                About Lay
+              </h2>
+              <div className="space-y-6 text-base md:text-lg leading-relaxed">
+                <p className="font-medium" style={{ color: 'var(--text-primary-70)' }}>
                   东北农业大学｜双一流｜211<br />
                   设计学背景｜辅修计算机科学
                 </p>
-                <p>
+                <p style={{ color: 'var(--text-secondary)' }}>
                   设计让我对视觉秩序、叙事路径和体验节奏更敏感；AI 与前端实践让我理解产品背后的流程、模型能力和工程边界。
                 </p>
-                <p className="text-white/90 font-medium">
+                <p className="font-medium" style={{ color: 'var(--text-primary-90)' }}>
                   我擅长把一个 AI 项目从概念、逻辑、视觉到前端原型完整设计出来。
                 </p>
               </div>
             </Reveal>
 
             <Reveal delay={200} className="flex flex-col justify-center">
-              <h3 className="text-xs font-mono uppercase tracking-widest text-[#474747] mb-6">Capabilities</h3>
+              <h3 className="text-xs font-mono uppercase tracking-widest mb-6" style={{ color: 'var(--text-muted)' }}>Capabilities</h3>
               <div className="flex flex-wrap gap-3">
                 {['Interface Design', 'AI Agent UI', 'AIGC Workflow', 'Frontend Prototyping', 'Visual Storytelling', 'Prompt System'].map(skill => (
-                  <span key={skill} className="px-4 py-2 rounded-full border border-white/10 bg-white/[0.03] text-sm text-white/80 hover:bg-white/10 transition-colors cursor-default">
+                  <span key={skill} className="px-4 py-2 rounded-full border text-sm cursor-default transition-colors"
+                    style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-card)', color: 'var(--text-primary-80)' }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-card-hover)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-card)')}>
                     {skill}
                   </span>
                 ))}
@@ -1064,21 +941,40 @@ export default function PortfolioPage() {
           </div>
         </section>
 
-        <section id="contact" className="py-24 md:py-32 bg-[#050505] border-t border-white/5 relative overflow-hidden">
-           <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none">
-              <h1 className="text-[20vw] font-bold tracking-tighter">LAY</h1>
-           </div>
-          <div className="max-w-4xl mx-auto px-6 md:px-12 text-center relative z-10">
-            <Reveal>
-              <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">Keep exploring, keep improving</h2>
-              <p className="text-xl text-[#8F8F8F] mb-12">保持探索，持续进步</p>
+        {/* ═══════════════════════════════════════════════════════════
+            CONTACT — 视觉冲击尾页
+            ═══════════════════════════════════════════════════════════ */}
+        <section id="contact" className="py-24 md:py-32 relative overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <h1 className="font-bold tracking-tighter" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(12vw, 20vw, 22vw)', opacity: 0.025 }}>
+              LAY
+            </h1>
+          </div>
 
+          <div className="max-w-5xl mx-auto px-6 md:px-12 relative z-10">
+            <Reveal>
+              {/* 标题区 — 占满 50% 视觉高度，形成冲击 */}
+              <div className="min-h-[50vh] flex flex-col items-center justify-center text-center mb-16">
+                <h2 className="font-bold tracking-tight leading-[1.05] mb-6"
+                  style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(2.5rem, 8vw, 7rem)' }}>
+                  Keep exploring,<br className="hidden md:block" /> keep improving
+                </h2>
+                <p className="font-medium tracking-wide" style={{ color: 'var(--text-secondary)', fontSize: 'clamp(1.125rem, 2.5vw, 1.75rem)' }}>
+                  保持探索，持续进步
+                </p>
+              </div>
+
+              {/* 联系方式 */}
               <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12">
-                <a href="tel:136-5731-0228" className="flex items-center gap-3 px-8 py-4 rounded-full border border-white/20 text-white font-medium hover:bg-white/10 transition-all duration-300 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black">
-                  <span className="text-sm text-[#8F8F8F]">phone</span>
-                  <span className="text-sm">136-5731-0228</span>
+                <a href="tel:136-5731-0228"
+                  className="flex items-center gap-3 px-8 py-4 rounded-full font-medium hover:transition-all duration-300 backdrop-blur-md focus:outline-none focus:ring-2"
+                  style={{ border: '1px solid var(--btn-secondary-border)', color: 'var(--btn-secondary-text)' }}>
+                  <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>phone</span>
+                  <span className="text-sm" style={{ color: 'var(--text-primary)' }}>136-5731-0228</span>
                 </a>
-                <a href="mailto:3130577758@qq.com" className="flex items-center gap-3 px-8 py-4 rounded-full bg-white text-black font-medium hover:bg-white/90 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black">
+                <a href="mailto:3130577758@qq.com"
+                  className="flex items-center gap-3 px-8 py-4 rounded-full font-medium hover:opacity-90 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2"
+                  style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)' }}>
                   <Mail size={18} />
                   <span>3130577758@qq.com</span>
                 </a>
@@ -1086,14 +982,13 @@ export default function PortfolioPage() {
             </Reveal>
           </div>
 
-          <div className="mt-32 pt-8 border-t border-white/10 text-center text-xs font-mono text-[#474747]">
+          <div className="mt-32 pt-8 text-center text-xs font-mono" style={{ color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)' }}>
             &copy; {new Date().getFullYear()} Lay Liu. Designed &amp; Built with React + Tailwind.
           </div>
         </section>
       </main>
 
       <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
-      </div>
-    </ThemeContext.Provider>
+    </div>
   );
 }
