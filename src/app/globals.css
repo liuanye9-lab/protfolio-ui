@@ -55,51 +55,14 @@
   --modal-bg:       #131316;
 }
 
-[data-theme="light"] {
-  /* ── Light Theme — Warm cream with slate accent ── */
-  --bg-primary:      #F5F2EC;
-  --bg-primary-rgb:  245, 242, 236;
-  --bg-secondary:    #EDE9E1;
-  --bg-secondary-rgb: 237, 233, 225;
-  --bg-tertiary:     #E8E4DC;
-  --bg-card:         rgba(30, 30, 34, 0.03);
-  --bg-card-5:       rgba(30, 30, 34, 0.04);
-  --bg-card-8:       rgba(30, 30, 34, 0.06);
-  --bg-card-10:      rgba(30, 30, 34, 0.08);
-  --bg-card-hover:   rgba(30, 30, 34, 0.06);
-  --bg-nav:          rgba(245, 242, 236, 0.55);
-  --bg-overlay:      rgba(245, 242, 236, 0.92);
+/* ═══════════════════════════════════════════════════════════════
+   Dark-Only Theme — Warm charcoal with cool accent
+   ═══════════════════════════════════════════════════════════════ */
 
-  --text-primary:    #1E1E22;
-  --text-primary-90: rgba(30, 30, 34, 0.90);
-  --text-primary-80: rgba(30, 30, 34, 0.80);
-  --text-primary-70: rgba(30, 30, 34, 0.70);
-  --text-primary-60: rgba(30, 30, 34, 0.60);
-  --text-primary-50: rgba(30, 30, 34, 0.50);
-  --text-primary-40: rgba(30, 30, 34, 0.40);
-  --text-secondary:  #6E6E73;
-  --text-muted:      #9A9A9E;
-  --text-tertiary:   rgba(30, 30, 34, 0.45);
-
-  --border-subtle:   rgba(30, 30, 34, 0.08);
-  --border-medium:   rgba(30, 30, 34, 0.14);
-  --border-strong:   rgba(30, 30, 34, 0.22);
-
-  --accent-rgb:      90, 107, 122;
-  --accent-color:    #5A6B7A;
-  --overlay-start:   #F5F2EC;
-
-  --btn-primary-bg:   #1E1E22;
-  --btn-primary-text: #F5F2EC;
-  --btn-secondary-bg:   transparent;
-  --btn-secondary-border: rgba(30, 30, 34, 0.20);
-  --btn-secondary-text:   #1E1E22;
-
-  --progress-track: rgba(30, 30, 34, 0.05);
-  --progress-fill:  rgba(90, 107, 122, 0.45);
-  --selection-bg:   rgba(90, 107, 122, 0.25);
-  --modal-backdrop: rgba(30, 30, 34, 0.35);
-  --modal-bg:       #FFFFFF;
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  scroll-behavior: smooth;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -109,14 +72,6 @@ html {
   font-family: var(--font-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  transition: background-color 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
-              color 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-  scroll-behavior: smooth;
 }
 
 ::selection {

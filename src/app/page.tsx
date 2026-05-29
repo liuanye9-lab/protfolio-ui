@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowRight, Mail, X, ChevronRight, Layout, Workflow, MonitorSmartphone, Sun, Moon } from 'lucide-react';
+import { ArrowRight, Mail, X, ChevronRight, Layout, Workflow, MonitorSmartphone } from 'lucide-react';
 import SilkVideoBackground from '@/components/SilkVideoBackground';
 import CursorAura from '@/components/CursorAura';
 
@@ -134,29 +134,15 @@ const PROJECTS = [
   }
 ];
 
-// ── Theme Hook ──
+// ── Dark-Only Theme (no toggle) ──
 function useTheme() {
-  const [isLight, setIsLight] = useState(false);
-
   useEffect(() => {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
-    if (saved === 'light') setIsLight(true);
-    else if (saved === 'dark') setIsLight(false);
-    else if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches) {
-      setIsLight(true);
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', 'dark');
     }
   }, []);
 
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
-      localStorage.setItem('theme', isLight ? 'light' : 'dark');
-    }
-  }, [isLight]);
-
-  const toggle = useCallback(() => setIsLight(p => !p), []);
-
-  return { isLight, toggle };
+  return {};
 }
 
 // ── Intersection Observer Hook ──
@@ -217,18 +203,7 @@ const ProgressBar = () => {
 
 const HeroVisual = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isLight, setIsLight] = useState(false);
   const mouse = useRef({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handler = () => {
-      setIsLight(document.documentElement.getAttribute('data-theme') === 'light');
-    };
-    handler();
-    const obs = new MutationObserver(handler);
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    return () => obs.disconnect();
-  }, []);
 
   useEffect(() => {
     mouse.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
@@ -259,7 +234,7 @@ const HeroVisual = () => {
     let animationFrameId: number;
     const render = () => {
       ctx.clearRect(0, 0, width, height);
-      const baseColor = isLight ? '160, 175, 195' : '200, 210, 225';
+      const baseColor = '200, 210, 225';
       ctx.globalCompositeOperation = 'screen';
       orbs.forEach((orb, i) => {
         if (orb.x < 0 || orb.x > width) orb.vx *= -1;
@@ -286,7 +261,7 @@ const HeroVisual = () => {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isLight]);
+  }, []);
 
   return (
     <div className="relative w-full h-[50vh] md:h-full flex items-center justify-center perspective-[1200px] preserve-3d">
@@ -525,15 +500,7 @@ const IntroScreen = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-const ThemeToggle = ({ isLight, onToggle }: { isLight: boolean; onToggle: () => void }) => (
-  <button onClick={onToggle} aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
-    className="w-9 h-9 flex items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 hover:scale-110 focus:outline-none"
-    style={{ background: 'var(--bg-card-5)', borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)' }}>
-    {isLight ? <Moon size={16} /> : <Sun size={16} />}
-  </button>
-);
-
-const NavBar = ({ onLogoClick, isLight, onToggleTheme }: { onLogoClick: () => void; isLight: boolean; onToggleTheme: () => void }) => {
+const NavBar = ({ onLogoClick }: { onLogoClick: () => void }) => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -546,13 +513,13 @@ const NavBar = ({ onLogoClick, isLight, onToggleTheme }: { onLogoClick: () => vo
 
   return (
     <nav className={`fixed top-6 left-1/2 -translate-x-1/2 z-40 transition-all duration-500 ${scrolled ? 'w-[92%] md:w-[440px]' : 'w-[92%] md:w-[520px]'}`}>
-      <div className="flex items-center justify-between px-5 py-3 rounded-full border backdrop-blur-xl shadow-2xl transition-colors duration-1000"
+      <div className="flex items-center justify-between px-5 py-3 rounded-full border backdrop-blur-xl shadow-2xl"
         style={{ background: 'var(--bg-nav)', borderColor: 'var(--border-subtle)' }}>
         <button className="font-medium tracking-tight cursor-pointer relative focus:outline-none"
           style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}
           onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); onLogoClick(); }}>
           Lay
-          <span className={`absolute -top-1 -right-2.5 w-1.5 h-1.5 rounded-full transition-all duration-1000 ${isLight ? 'opacity-100' : 'opacity-0'}`}
+          <span className="absolute -top-1 -right-2.5 w-1.5 h-1.5 rounded-full"
             style={{ background: 'var(--accent-color)', boxShadow: '0 0 8px var(--accent-color)' }} />
         </button>
         <div className="flex items-center gap-5 text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -565,8 +532,6 @@ const NavBar = ({ onLogoClick, isLight, onToggleTheme }: { onLogoClick: () => vo
           <button onClick={() => scrollTo('about')} className="hover:transition-colors focus:outline-none"
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
             onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>About</button>
-          <div className="w-px h-4" style={{ background: 'var(--border-subtle)' }} />
-          <ThemeToggle isLight={isLight} onToggle={onToggleTheme} />
         </div>
       </div>
     </nav>
@@ -722,18 +687,17 @@ export default function PortfolioPage() {
   const [introDone, setIntroDone] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [clickCount, setClickCount] = useState(0);
-  const { isLight, toggle } = useTheme();
+  useTheme();
 
   const handleLogoClick = useCallback(() => {
     setClickCount(c => c + 1);
     if (clickCount >= 4) {
-      toggle();
       setClickCount(0);
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate([15, 30, 15]);
       }
     }
-  }, [clickCount, toggle]);
+  }, [clickCount]);
 
   useEffect(() => {
     if (!introDone) { document.body.style.overflow = 'hidden'; }
@@ -746,7 +710,7 @@ export default function PortfolioPage() {
       <SilkVideoBackground />
       <CursorAura />
       <ProgressBar />
-      <NavBar onLogoClick={handleLogoClick} isLight={isLight} onToggleTheme={toggle} />
+      <NavBar onLogoClick={handleLogoClick} />
 
       <main className="relative z-10">
         {/* ═══════════════════════════════════════════════════════════
@@ -804,27 +768,27 @@ export default function PortfolioPage() {
           </div>
 
           {/* 右侧人像照片背景 */}
-          <div className="absolute right-0 top-0 h-full w-full md:w-[55%] lg:w-[50%] pointer-events-none z-0 hidden md:block">
-            {/* 照片本体 — 更高透明度、无模糊 */}
+          <div className="absolute right-0 top-0 h-full w-full md:w-[65%] lg:w-[60%] pointer-events-none z-0 hidden md:block"
+            style={{ maskImage: 'linear-gradient(to left, black 60%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to left, black 60%, transparent 100%)' }}>
             <img
               src="/home-portrait-bg.jpg"
               alt="Lay Liu Portrait"
               className="w-full h-full object-cover object-top"
-              style={{ opacity: 0.55 }}
+              style={{ opacity: 0.7 }}
             />
-            {/* 左侧渐变遮罩 — 用实色彻底挡住背景视频穿透 */}
-            <div className="absolute inset-y-0 left-0 w-3/4" style={{ background: 'linear-gradient(to right, var(--bg-primary) 30%, transparent 100%)' }} />
-            {/* 底部渐变遮罩 — 加强遮挡 */}
-            <div className="absolute bottom-0 left-0 right-0 h-2/5" style={{ background: 'linear-gradient(to top, var(--bg-primary) 40%, transparent 100%)' }} />
+            {/* 左侧渐变遮罩 — 柔化边缘融入背景 */}
+            <div className="absolute inset-y-0 left-0 w-3/5" style={{ background: 'linear-gradient(to right, var(--bg-primary) 15%, transparent 100%)' }} />
+            {/* 底部渐变遮罩 */}
+            <div className="absolute bottom-0 left-0 right-0 h-1/3" style={{ background: 'linear-gradient(to top, var(--bg-primary) 30%, transparent 100%)' }} />
             {/* 顶部渐变遮罩 */}
-            <div className="absolute top-0 left-0 right-0 h-1/5" style={{ background: 'linear-gradient(to bottom, var(--bg-primary) 20%, transparent 100%)' }} />
+            <div className="absolute top-0 left-0 right-0 h-1/6" style={{ background: 'linear-gradient(to bottom, var(--bg-primary) 15%, transparent 100%)' }} />
           </div>
         </section>
 
         {/* ═══════════════════════════════════════════════════════════
             CAPABILITIES
             ═══════════════════════════════════════════════════════════ */}
-        <section className="py-24 md:py-32 relative backdrop-blur-sm" style={{ background: 'rgba(var(--bg-secondary-rgb), 0.88)' }}>
+        <section className="py-24 md:py-32 relative backdrop-blur-xl" style={{ background: 'rgba(var(--bg-secondary-rgb), 0.78)', borderTop: '1px solid var(--border-subtle)' }}>
           <div className="max-w-7xl mx-auto px-6 md:px-12">
             <Reveal>
               <h2 className="font-bold tracking-tight mb-4" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(1.75rem, 3.5vw, 3rem)' }}>
@@ -845,10 +809,10 @@ export default function PortfolioPage() {
               ].map((item, idx) => (
                 <Reveal key={item.title} delay={(idx + 1) * 100}>
                   <TiltCard intensity={5}>
-                    <div className="p-8 rounded-3xl border backdrop-blur-md transition-colors group h-full"
-                      style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}
+                    <div className="p-8 rounded-3xl border backdrop-blur-xl transition-colors group h-full"
+                      style={{ background: 'var(--bg-card-10)', borderColor: 'var(--border-subtle)' }}
                       onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-card-hover)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-card)')}>
+                      onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-card-10)')}>
                       <item.icon className="w-8 h-8 mb-6 transition-colors" style={{ color: 'var(--text-tertiary)' }}
                         onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
                         onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-tertiary)')} />
@@ -981,8 +945,8 @@ export default function PortfolioPage() {
               ].map((step, idx) => (
                 <Reveal key={step.title} delay={idx * 100} className="relative z-10">
                   <TiltCard intensity={4}>
-                    <div className="p-8 border rounded-3xl h-full flex flex-col group transition-colors duration-500 relative overflow-hidden"
-                      style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)' }}
+                    <div className="p-8 border rounded-3xl h-full flex flex-col group transition-colors duration-500 relative overflow-hidden backdrop-blur-xl"
+                      style={{ background: 'var(--bg-card-8)', borderColor: 'var(--border-subtle)' }}
                       onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--border-medium)')}
                       onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border-subtle)')}>
                       <div className="absolute top-0 right-0 p-4 text-[100px] font-bold leading-none pointer-events-none" style={{ color: 'var(--text-primary)', opacity: 0.02 }}>{idx + 1}</div>
@@ -1000,7 +964,7 @@ export default function PortfolioPage() {
         {/* ═══════════════════════════════════════════════════════════
             ABOUT
             ═══════════════════════════════════════════════════════════ */}
-        <section id="about" className="py-24 md:py-32 relative">
+        <section id="about" className="py-24 md:py-32 relative backdrop-blur-xl" style={{ background: 'rgba(var(--bg-secondary-rgb), 0.78)', borderTop: '1px solid var(--border-subtle)' }}>
           <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-16">
             <Reveal>
               <h2 className="font-bold tracking-tight mb-12" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(1.75rem, 3.5vw, 3rem)' }}>
@@ -1024,10 +988,10 @@ export default function PortfolioPage() {
               <h3 className="text-xs font-mono uppercase tracking-widest mb-6" style={{ color: 'var(--text-muted)' }}>Capabilities</h3>
               <div className="flex flex-wrap gap-3">
                 {['Interface Design', 'AI Agent UI', 'AIGC Workflow', 'Frontend Prototyping', 'Visual Storytelling', 'Prompt System'].map(skill => (
-                  <span key={skill} className="px-4 py-2 rounded-full border text-sm cursor-default transition-colors"
-                    style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-card)', color: 'var(--text-primary-80)' }}
+                  <span key={skill} className="px-4 py-2 rounded-full border text-sm cursor-default transition-colors backdrop-blur-md"
+                    style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-card-8)', color: 'var(--text-primary-80)' }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-card-hover)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-card)')}>
+                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-card-8)')}>
                     {skill}
                   </span>
                 ))}
@@ -1039,7 +1003,7 @@ export default function PortfolioPage() {
         {/* ═══════════════════════════════════════════════════════════
             CONTACT — 视觉冲击尾页
             ═══════════════════════════════════════════════════════════ */}
-        <section id="contact" className="py-24 md:py-32 relative overflow-hidden backdrop-blur-sm" style={{ background: 'rgba(var(--bg-secondary-rgb), 0.88)' }}>
+        <section id="contact" className="py-24 md:py-32 relative overflow-hidden backdrop-blur-xl" style={{ background: 'rgba(var(--bg-secondary-rgb), 0.78)', borderTop: '1px solid var(--border-subtle)' }}>
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <h1 className="font-bold tracking-tighter" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(12vw, 20vw, 22vw)', opacity: 0.025 }}>
               LAY
