@@ -2,8 +2,16 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
+/* ── Path config ── */
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
+const VIDEO_SRC = `${BASE_PATH}/BG.mp4`;
+
+if (process.env.NODE_ENV === "development") {
+  console.log("[SilkVideoBackground] VIDEO_SRC:", VIDEO_SRC);
+}
+
 /* ── Canvas Fluid Animation (always works as base layer) ── */
-function useCanvasFluid(canvasRef: React.RefObject<HTMLCanvasElement | null>, isLight: boolean) {
+function useCanvasFluid(canvasRef: React.RefObject<HTMLCanvasElement | null>, isLight: boolean, paused: boolean) {
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
@@ -25,7 +33,7 @@ function useCanvasFluid(canvasRef: React.RefObject<HTMLCanvasElement | null>, is
     let time = 0;
 
     const draw = () => {
-      time += 0.003;
+      if (!paused) time += 0.003;
       ctx.clearRect(0, 0, w, h);
 
       const baseR = isLight ? 228 : 18;
@@ -61,7 +69,7 @@ function useCanvasFluid(canvasRef: React.RefObject<HTMLCanvasElement | null>, is
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
     };
-  }, [isLight]);
+  }, [isLight, paused]);
 }
 
 export default function SilkVideoBackground() {
@@ -69,56 +77,119 @@ export default function SilkVideoBackground() {
   const glowRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLight, setIsLight] = useState(false);
-  const [videoVisible, setVideoVisible] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   const mouseRef = useRef({ x: -1000, y: -1000, active: false });
   const videoOffsetRef = useRef({ x: 0, y: 0 });
   const glowPosRef = useRef({ x: -1000, y: -1000 });
   const rafRef = useRef<number>(0);
 
-  // Canvas fluid base layer
-  useCanvasFluid(canvasRef, isLight);
+  // Canvas fluid base layer (paused when reduced motion)
+  useCanvasFluid(canvasRef, isLight, reducedMotion);
 
-  // Theme
+  // Theme + reduced motion
   useEffect(() => {
     const getTheme = () => document.documentElement.getAttribute("data-theme") === "light";
     setIsLight(getTheme());
+
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    const onMotionChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mq.addEventListener("change", onMotionChange);
+
     const observer = new MutationObserver(() => setIsLight(getTheme()));
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => observer.disconnect();
+
+    return () => {
+      observer.disconnect();
+      mq.removeEventListener("change", onMotionChange);
+    };
   }, []);
 
-  // Video playback with visibility detection
+  // Video playback with full state tracking
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Mark visible immediately, hide only on error
-    setVideoVisible(true);
-
     const tryPlay = () => {
-      video.play().catch(() => {});
+      video.play().catch((err) => {
+        console.warn("[SilkVideoBackground] autoplay blocked or failed:", err);
+      });
     };
 
-    video.addEventListener("canplaythrough", tryPlay);
-    video.addEventListener("loadeddata", tryPlay);
+    const onLoadedData = () => {
+      setVideoReady(true);
+      setVideoError(false);
+      tryPlay();
+    };
 
-    tryPlay();
+    const onCanPlay = () => {
+      setVideoReady(true);
+      setVideoError(false);
+      tryPlay();
+    };
 
-    const onInteract = () => tryPlay();
+    const onError = () => {
+      setVideoError(true);
+      setVideoReady(false);
+      console.warn("[SilkVideoBackground] video failed to load:", VIDEO_SRC);
+    };
+
+    video.addEventListener("loadeddata", onLoadedData);
+    video.addEventListener("canplay", onCanPlay);
+    video.addEventListener("error", onError);
+
+    // Don't play if reduced motion
+    if (!reducedMotion) {
+      tryPlay();
+    }
+
+    const onInteract = () => { if (!reducedMotion) tryPlay(); };
     window.addEventListener("click", onInteract, { once: true });
     window.addEventListener("scroll", onInteract, { once: true });
 
     return () => {
-      video.removeEventListener("canplaythrough", tryPlay);
-      video.removeEventListener("loadeddata", tryPlay);
+      video.removeEventListener("loadeddata", onLoadedData);
+      video.removeEventListener("canplay", onCanPlay);
+      video.removeEventListener("error", onError);
     };
-  }, []);
+  }, [reducedMotion]);
 
-  // Mouse parallax + glow
+  // Mouse parallax + glow (weakened if reduced motion)
   useEffect(() => {
     const glow = glowRef.current;
     if (!glow) return;
+
+    const parallaxStrength = reducedMotion ? 0 : 20;
+    const lerpSpeed = reducedMotion ? 0.02 : 0.08;
+    const glowLerp = reducedMotion ? 0.03 : 0.12;
+    const glowMaxOpacity = reducedMotion ? 0.2 : 0.6;
+
+    const tick = () => {
+      const { x, y, active } = mouseRef.current;
+      const video = videoRef.current;
+
+      if (!active) {
+        videoOffsetRef.current.x += (0 - videoOffsetRef.current.x) * lerpSpeed * 0.4;
+        videoOffsetRef.current.y += (0 - videoOffsetRef.current.y) * lerpSpeed * 0.4;
+        glowPosRef.current.x += (-1000 - glowPosRef.current.x) * 0.05;
+        glowPosRef.current.y += (-1000 - glowPosRef.current.y) * 0.05;
+      } else {
+        videoOffsetRef.current.x += ((x / window.innerWidth - 0.5) * -parallaxStrength - videoOffsetRef.current.x) * lerpSpeed;
+        videoOffsetRef.current.y += ((y / window.innerHeight - 0.5) * -parallaxStrength - videoOffsetRef.current.y) * lerpSpeed;
+        glowPosRef.current.x += (x - glowPosRef.current.x) * glowLerp;
+        glowPosRef.current.y += (y - glowPosRef.current.y) * glowLerp;
+      }
+
+      if (video) {
+        video.style.transform = `scale(1.08) translate(${videoOffsetRef.current.x}px, ${videoOffsetRef.current.y}px)`;
+      }
+      glow.style.left = `${glowPosRef.current.x}px`;
+      glow.style.top = `${glowPosRef.current.y}px`;
+      glow.style.opacity = active ? (isLight ? "0.5" : String(glowMaxOpacity)) : "0";
+    };
 
     let ticking = false;
     const onMove = (e: MouseEvent) => {
@@ -129,30 +200,6 @@ export default function SilkVideoBackground() {
       }
     };
 
-    const tick = () => {
-      const { x, y, active } = mouseRef.current;
-      const video = videoRef.current;
-
-      if (!active) {
-        videoOffsetRef.current.x += (0 - videoOffsetRef.current.x) * 0.03;
-        videoOffsetRef.current.y += (0 - videoOffsetRef.current.y) * 0.03;
-        glowPosRef.current.x += (-1000 - glowPosRef.current.x) * 0.05;
-        glowPosRef.current.y += (-1000 - glowPosRef.current.y) * 0.05;
-      } else {
-        videoOffsetRef.current.x += ((x / window.innerWidth - 0.5) * -20 - videoOffsetRef.current.x) * 0.08;
-        videoOffsetRef.current.y += ((y / window.innerHeight - 0.5) * -20 - videoOffsetRef.current.y) * 0.08;
-        glowPosRef.current.x += (x - glowPosRef.current.x) * 0.12;
-        glowPosRef.current.y += (y - glowPosRef.current.y) * 0.12;
-      }
-
-      if (video) {
-        video.style.transform = `scale(1.08) translate(${videoOffsetRef.current.x}px, ${videoOffsetRef.current.y}px)`;
-      }
-      glow.style.left = `${glowPosRef.current.x}px`;
-      glow.style.top = `${glowPosRef.current.y}px`;
-      glow.style.opacity = active ? (isLight ? "0.5" : "0.6") : "0";
-    };
-
     window.addEventListener("mousemove", onMove, { passive: true });
     const idle = () => { if (!mouseRef.current.active) tick(); rafRef.current = requestAnimationFrame(idle); };
     rafRef.current = requestAnimationFrame(idle);
@@ -161,7 +208,9 @@ export default function SilkVideoBackground() {
       window.removeEventListener("mousemove", onMove);
       cancelAnimationFrame(rafRef.current);
     };
-  }, [isLight]);
+  }, [isLight, reducedMotion]);
+
+  const videoOpacity = videoReady && !videoError && !reducedMotion ? (isLight ? 0.5 : 0.65) : 0;
 
   return (
     <div
@@ -196,22 +245,50 @@ export default function SilkVideoBackground() {
         }}
       />
 
-      {/* ── Video layer — HIGH opacity, no blend mode ── */}
+      {/* ── Fallback poster (shown when video errors) ── */}
+      {videoError && (
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: isLight
+              ? "linear-gradient(135deg, rgba(200,190,175,0.15), rgba(220,215,205,0.1))"
+              : "linear-gradient(135deg, rgba(30,30,40,0.2), rgba(20,20,28,0.15))",
+            zIndex: 2,
+          }}
+        />
+      )}
+
+      {/* ── Video layer ── */}
       <video
         ref={videoRef}
-        src="/BG.MP4"
+        src={VIDEO_SRC}
         autoPlay
         loop
         muted
         playsInline
         preload="auto"
+        onLoadedData={() => {
+          setVideoReady(true);
+          setVideoError(false);
+        }}
+        onCanPlay={() => {
+          setVideoReady(true);
+          setVideoError(false);
+        }}
+        onError={() => {
+          setVideoError(true);
+          setVideoReady(false);
+          console.warn("[SilkVideoBackground] video failed to load:", VIDEO_SRC);
+        }}
         style={{
           position: "absolute",
           inset: "-5%",
           width: "110%",
           height: "110%",
           objectFit: "cover",
-          opacity: videoVisible ? (isLight ? 0.5 : 0.65) : 0,
+          opacity: videoOpacity,
           filter: isLight
             ? "saturate(0.5) contrast(0.85) brightness(1.1)"
             : "saturate(0.4) contrast(1.05) brightness(0.95)",
