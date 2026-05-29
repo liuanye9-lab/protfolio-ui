@@ -716,8 +716,10 @@ export default function PortfolioPage() {
         {/* ═══════════════════════════════════════════════════════════
             HERO
             ═══════════════════════════════════════════════════════════ */}
-        <section className="min-h-screen pt-24 pb-12 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-6 md:px-12 relative overflow-hidden">
-          <div className="w-full md:w-1/2 z-20 pt-20 md:pt-0">
+        <section className="min-h-screen pt-24 pb-12 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-6 md:px-12 relative overflow-hidden"
+          style={{ background: 'linear-gradient(to right, rgba(15,15,18,0.88) 35%, rgba(15,15,18,0.35) 55%, transparent 100%)' }}>
+          <div className="w-full md:w-1/2 z-20 pt-20 md:pt-0 relative"
+            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}>
             <Reveal delay={200}>
               <div className="mb-6">
                 <h2 className="font-bold tracking-tight mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(2rem, 4vw, 3.5rem)', lineHeight: 1.1 }}>
@@ -774,14 +776,8 @@ export default function PortfolioPage() {
               src="/home-portrait-bg.jpg"
               alt="Lay Liu Portrait"
               className="w-full h-full object-cover object-top"
-              style={{ opacity: 0.7 }}
+              style={{ opacity: 0.85 }}
             />
-            {/* 左侧渐变遮罩 — 柔化边缘融入背景 */}
-            <div className="absolute inset-y-0 left-0 w-3/5" style={{ background: 'linear-gradient(to right, var(--bg-primary) 15%, transparent 100%)' }} />
-            {/* 底部渐变遮罩 */}
-            <div className="absolute bottom-0 left-0 right-0 h-1/3" style={{ background: 'linear-gradient(to top, var(--bg-primary) 30%, transparent 100%)' }} />
-            {/* 顶部渐变遮罩 */}
-            <div className="absolute top-0 left-0 right-0 h-1/6" style={{ background: 'linear-gradient(to bottom, var(--bg-primary) 15%, transparent 100%)' }} />
           </div>
         </section>
 
