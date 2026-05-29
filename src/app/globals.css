@@ -9,92 +9,96 @@
   --font-text:    -apple-system, BlinkMacSystemFont, "SF Pro Text",    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif;
   --font-mono:    "SF Mono", SFMono-Regular, ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", monospace;
 
-  /* ── Dark Theme (default) ── */
-  --bg-primary:      #000000;
-  --bg-secondary:    #050505;
-  --bg-tertiary:     #0A0A0A;
-  --bg-card:         rgba(255,255,255,0.03);
-  --bg-card-5:       rgba(255,255,255,0.05);
-  --bg-card-8:       rgba(255,255,255,0.08);
-  --bg-card-10:      rgba(255,255,255,0.10);
-  --bg-card-hover:   rgba(255,255,255,0.06);
-  --bg-nav:          rgba(0,0,0,0.40);
-  --bg-overlay:      rgba(0,0,0,0.95);
+  /* ── Dark Theme (default) — Warm charcoal with cool accent ── */
+  --bg-primary:      #0F0F12;
+  --bg-primary-rgb:  15, 15, 18;
+  --bg-secondary:    #131316;
+  --bg-secondary-rgb: 19, 19, 22;
+  --bg-tertiary:     #18181C;
+  --bg-card:         rgba(230, 225, 218, 0.035);
+  --bg-card-5:       rgba(230, 225, 218, 0.05);
+  --bg-card-8:       rgba(230, 225, 218, 0.08);
+  --bg-card-10:      rgba(230, 225, 218, 0.10);
+  --bg-card-hover:   rgba(230, 225, 218, 0.06);
+  --bg-nav:          rgba(15, 15, 18, 0.50);
+  --bg-overlay:      rgba(10, 10, 12, 0.92);
 
-  --text-primary:    #FFFFFF;
-  --text-primary-90: rgba(255,255,255,0.90);
-  --text-primary-80: rgba(255,255,255,0.80);
-  --text-primary-70: rgba(255,255,255,0.70);
-  --text-primary-60: rgba(255,255,255,0.60);
-  --text-primary-50: rgba(255,255,255,0.50);
-  --text-primary-40: rgba(255,255,255,0.40);
-  --text-secondary:  #8F8F8F;
-  --text-muted:      #474747;
-  --text-tertiary:   rgba(255,255,255,0.50);
+  --text-primary:    #E8E4DE;
+  --text-primary-90: rgba(232, 228, 222, 0.90);
+  --text-primary-80: rgba(232, 228, 222, 0.80);
+  --text-primary-70: rgba(232, 228, 222, 0.70);
+  --text-primary-60: rgba(232, 228, 222, 0.60);
+  --text-primary-50: rgba(232, 228, 222, 0.50);
+  --text-primary-40: rgba(232, 228, 222, 0.40);
+  --text-secondary:  #8A8A8E;
+  --text-muted:      #5A5A5E;
+  --text-tertiary:   rgba(232, 228, 222, 0.45);
 
-  --border-subtle:   rgba(255,255,255,0.08);
-  --border-medium:   rgba(255,255,255,0.15);
-  --border-strong:   rgba(255,255,255,0.20);
+  --border-subtle:   rgba(230, 225, 218, 0.08);
+  --border-medium:   rgba(230, 225, 218, 0.14);
+  --border-strong:   rgba(230, 225, 218, 0.22);
 
-  --accent-rgb:      255, 255, 255;
-  --accent-color:    #FFFFFF;
-  --overlay-start:   #000000;
+  --accent-rgb:      138, 155, 174;
+  --accent-color:    #8A9BAE;
+  --overlay-start:   #0F0F12;
 
-  --btn-primary-bg:   #FFFFFF;
-  --btn-primary-text: #000000;
+  --btn-primary-bg:   #E8E4DE;
+  --btn-primary-text: #0F0F12;
   --btn-secondary-bg:   transparent;
-  --btn-secondary-border: rgba(255,255,255,0.20);
-  --btn-secondary-text:   #FFFFFF;
+  --btn-secondary-border: rgba(230, 225, 218, 0.20);
+  --btn-secondary-text:   #E8E4DE;
 
-  --progress-track: rgba(255,255,255,0.02);
-  --progress-fill:  rgba(255,255,255,0.40);
-  --selection-bg:   rgba(255,255,255,0.30);
-  --modal-backdrop: rgba(0,0,0,0.60);
-  --modal-bg:       #0A0A0A;
+  --progress-track: rgba(230, 225, 218, 0.03);
+  --progress-fill:  rgba(138, 155, 174, 0.50);
+  --selection-bg:   rgba(138, 155, 174, 0.30);
+  --modal-backdrop: rgba(10, 10, 12, 0.65);
+  --modal-bg:       #131316;
 }
 
 [data-theme="light"] {
-  /* ── Light Theme — iOS System Colors ── */
-  --bg-primary:      #F5F5F7;
-  --bg-secondary:    #FFFFFF;
-  --bg-tertiary:     #FFFFFF;
-  --bg-card:         rgba(0,0,0,0.02);
-  --bg-card-5:       rgba(0,0,0,0.03);
-  --bg-card-8:       rgba(0,0,0,0.05);
-  --bg-card-10:      rgba(0,0,0,0.06);
-  --bg-card-hover:   rgba(0,0,0,0.05);
-  --bg-nav:          rgba(255,255,255,0.60);
-  --bg-overlay:      rgba(255,255,255,0.95);
+  /* ── Light Theme — Warm cream with slate accent ── */
+  --bg-primary:      #F5F2EC;
+  --bg-primary-rgb:  245, 242, 236;
+  --bg-secondary:    #EDE9E1;
+  --bg-secondary-rgb: 237, 233, 225;
+  --bg-tertiary:     #E8E4DC;
+  --bg-card:         rgba(30, 30, 34, 0.03);
+  --bg-card-5:       rgba(30, 30, 34, 0.04);
+  --bg-card-8:       rgba(30, 30, 34, 0.06);
+  --bg-card-10:      rgba(30, 30, 34, 0.08);
+  --bg-card-hover:   rgba(30, 30, 34, 0.06);
+  --bg-nav:          rgba(245, 242, 236, 0.55);
+  --bg-overlay:      rgba(245, 242, 236, 0.92);
 
-  --text-primary:    #1D1D1F;
-  --text-primary-90: rgba(29,29,31,0.90);
-  --text-primary-80: rgba(29,29,31,0.80);
-  --text-primary-70: rgba(29,29,31,0.70);
-  --text-primary-60: rgba(29,29,31,0.60);
-  --text-primary-50: rgba(29,29,31,0.50);
-  --text-primary-40: rgba(29,29,31,0.40);
+  --text-primary:    #1E1E22;
+  --text-primary-90: rgba(30, 30, 34, 0.90);
+  --text-primary-80: rgba(30, 30, 34, 0.80);
+  --text-primary-70: rgba(30, 30, 34, 0.70);
+  --text-primary-60: rgba(30, 30, 34, 0.60);
+  --text-primary-50: rgba(30, 30, 34, 0.50);
+  --text-primary-40: rgba(30, 30, 34, 0.40);
   --text-secondary:  #6E6E73;
-  --text-muted:      #86868B;
-  --text-tertiary:   rgba(0,0,0,0.50);
+  --text-muted:      #9A9A9E;
+  --text-tertiary:   rgba(30, 30, 34, 0.45);
 
-  --border-subtle:   rgba(0,0,0,0.08);
-  --border-medium:   rgba(0,0,0,0.15);
-  --border-strong:   rgba(0,0,0,0.20);
+  --border-subtle:   rgba(30, 30, 34, 0.08);
+  --border-medium:   rgba(30, 30, 34, 0.14);
+  --border-strong:   rgba(30, 30, 34, 0.22);
 
-  --accent-rgb:      0, 122, 255;
-  --accent-color:    #007AFF;
-  --overlay-start:   #F5F5F7;
+  --accent-rgb:      90, 107, 122;
+  --accent-color:    #5A6B7A;
+  --overlay-start:   #F5F2EC;
 
-  --btn-primary-bg:   #1D1D1F;
-  --btn-primary-text: #FFFFFF;
+  --btn-primary-bg:   #1E1E22;
+  --btn-primary-text: #F5F2EC;
   --btn-secondary-bg:   transparent;
-  --btn-secondary-border: rgba(0,0,0,0.20);
-  --btn-secondary-text:   #1D1D1F;
+  --btn-secondary-border: rgba(30, 30, 34, 0.20);
+  --btn-secondary-text:   #1E1E22;
 
-  --progress-track: rgba(0,0,0,0.04);
-  --progress-fill:  rgba(0,0,0,0.30);
-  --selection-bg:   rgba(0,122,255,0.20);
-  --modal-backdrop: rgba(0,0,0,0.30);
+  --progress-track: rgba(30, 30, 34, 0.05);
+  --progress-fill:  rgba(90, 107, 122, 0.45);
+  --selection-bg:   rgba(90, 107, 122, 0.25);
+  --modal-backdrop: rgba(30, 30, 34, 0.35);
   --modal-bg:       #FFFFFF;
 }
 
@@ -110,8 +114,8 @@ html {
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  transition: background-color 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
-              color 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: background-color 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+              color 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
   scroll-behavior: smooth;
 }
 
@@ -124,4 +128,13 @@ body {
 ::-webkit-scrollbar {
   width: 0px;
   background: transparent;
+}
+
+/* ── 3D perspective utilities ── */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
 }

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowRight, Mail, X, ChevronRight, Layout, Workflow, MonitorSmartphone, Sun, Moon } from 'lucide-react';
+import SilkVideoBackground from '@/components/SilkVideoBackground';
+import CursorAura from '@/components/CursorAura';
 
 // ── Custom Brand Icons ──
 const GithubIcon = ({ size = 18 }: { size?: number }) => (
@@ -257,7 +259,7 @@ const HeroVisual = () => {
     let animationFrameId: number;
     const render = () => {
       ctx.clearRect(0, 0, width, height);
-      const baseColor = isLight ? '200, 210, 230' : '255, 255, 255';
+      const baseColor = isLight ? '160, 175, 195' : '200, 210, 225';
       ctx.globalCompositeOperation = 'screen';
       orbs.forEach((orb, i) => {
         if (orb.x < 0 || orb.x > width) orb.vx *= -1;
@@ -268,7 +270,7 @@ const HeroVisual = () => {
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 400) { orb.x += dx * 0.001; orb.y += dy * 0.001; }
         const gradient = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
-        const alpha = i === 0 ? 0.08 : 0.04;
+        const alpha = i === 0 ? 0.06 : 0.03;
         gradient.addColorStop(0, `rgba(${baseColor}, ${alpha})`);
         gradient.addColorStop(1, `rgba(${baseColor}, 0)`);
         ctx.fillStyle = gradient;
@@ -287,14 +289,14 @@ const HeroVisual = () => {
   }, [isLight]);
 
   return (
-    <div className="relative w-full h-[50vh] md:h-full flex items-center justify-center perspective-[1000px]">
-      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none opacity-80" style={{ width: '100%', height: '100%', filter: 'blur(30px)' }} />
-      <div className="absolute w-64 h-40 md:w-96 md:h-56 border rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-1000 overflow-hidden"
+    <div className="relative w-full h-[50vh] md:h-full flex items-center justify-center perspective-[1200px] preserve-3d">
+      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none opacity-60" style={{ width: '100%', height: '100%', filter: 'blur(40px)' }} />
+      <div className="absolute w-64 h-40 md:w-96 md:h-56 border rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-1000 overflow-hidden preserve-3d"
         style={{ transform: `rotateX(15deg) rotateY(-15deg) translateZ(50px)`, borderColor: 'var(--border-subtle)', background: 'var(--bg-primary)' }}>
         <img src={PROJECTS[0].cover} alt="StableAgent OS" className="w-full h-full object-cover opacity-90" />
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top right, var(--bg-primary) 40%, transparent)' }} />
       </div>
-      <div className="absolute w-56 h-32 md:w-80 md:h-48 border rounded-2xl flex items-center justify-center shadow-2xl z-10 transition-all duration-1000 overflow-hidden"
+      <div className="absolute w-56 h-32 md:w-80 md:h-48 border rounded-2xl flex items-center justify-center shadow-2xl z-10 transition-all duration-1000 overflow-hidden preserve-3d"
         style={{ transform: `rotateX(5deg) rotateY(10deg) translateZ(100px)`, borderColor: 'var(--border-subtle)', background: 'var(--bg-secondary)' }}>
         <img src={PROJECTS[2].cover} alt="ControlNet Workflow" className="w-full h-full object-cover opacity-90" />
         <div className="absolute inset-0 border rounded-2xl pointer-events-none transition-colors duration-1000" style={{ borderColor: 'rgba(var(--accent-rgb), 0.2)' }} />
@@ -389,6 +391,40 @@ const Reveal = ({ children, delay = 0, className = "" }: { children: React.React
   return (
     <div ref={ref} className={`transition-all duration-1000 ${className}`}
       style={{ opacity: isVisible ? 1 : 0, transform: isVisible ? 'translateY(0)' : 'translateY(40px)', transitionTimingFunction: BEZIER, transitionDelay: `${delay}ms` }}>
+      {children}
+    </div>
+  );
+};
+
+// ── 3D Tilt Card ──
+const TiltCard = ({ children, className = "", intensity = 6 }: { children: React.ReactNode, className?: string, intensity?: number }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  const handleMove = (e: React.MouseEvent) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setTilt({ x: y * intensity, y: -x * intensity });
+  };
+
+  return (
+    <div
+      ref={ref}
+      className={className}
+      onMouseMove={handleMove}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => { setIsHovering(false); setTilt({ x: 0, y: 0 }); }}
+      style={{
+        transform: isHovering
+          ? `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(1.01, 1.01, 1.01)`
+          : 'perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+        transition: 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)',
+        transformStyle: 'preserve-3d',
+      }}
+    >
       {children}
     </div>
   );
@@ -705,8 +741,10 @@ export default function PortfolioPage() {
   }, [introDone]);
 
   return (
-    <div className="min-h-screen transition-colors duration-1000" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+    <div className="min-h-screen transition-colors duration-1000" style={{ color: 'var(--text-primary)' }}>
       {!introDone && <IntroScreen onComplete={() => setIntroDone(true)} />}
+      <SilkVideoBackground />
+      <CursorAura />
       <ProgressBar />
       <NavBar onLogoClick={handleLogoClick} isLight={isLight} onToggleTheme={toggle} />
 
@@ -729,7 +767,7 @@ export default function PortfolioPage() {
               <h1 className="font-bold tracking-tight leading-[1.15] mb-6" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(1.75rem, 3.5vw, 3rem)' }}>
                 Designing interfaces for{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r transition-all duration-1000"
-                  style={{ backgroundImage: `linear-gradient(to right, var(--text-primary), var(--text-muted))` }}>
+                  style={{ backgroundImage: `linear-gradient(to right, var(--text-primary), var(--accent-color))` }}>
                   AI Agent products
                 </span>.
               </h1>
@@ -766,17 +804,17 @@ export default function PortfolioPage() {
           </div>
 
           {/* 右侧人像照片背景 */}
-          <div className="absolute right-0 top-0 h-full w-full md:w-[55%] lg:w-[50%] pointer-events-none z-0 hidden md:block">
-            <img src="/home-portrait-bg.jpg" alt="Lay Liu Portrait" className="w-full h-full object-cover object-top" style={{ opacity: 0.4 }} />
-            <div className="absolute inset-y-0 left-0 w-1/2" style={{ background: 'linear-gradient(to right, var(--bg-primary), transparent)' }} />
-            <div className="absolute bottom-0 left-0 right-0 h-1/4" style={{ background: 'linear-gradient(to top, var(--bg-primary), transparent)' }} />
+          <div className="absolute right-0 top-0 h-full w-full md:w-[55%] lg:w-[50%] pointer-events-none z-0 hidden md:block" style={{ maskImage: 'linear-gradient(to left, black 50%, transparent 100%), linear-gradient(to top, transparent 0%, black 20%)', WebkitMaskImage: 'linear-gradient(to left, black 50%, transparent 100%), linear-gradient(to top, transparent 0%, black 20%)' }}>
+            <img src="/home-portrait-bg.jpg" alt="Lay Liu Portrait" className="w-full h-full object-cover object-top" style={{ opacity: 0.3, filter: 'blur(0.5px)' }} />
+            <div className="absolute inset-y-0 left-0 w-2/3" style={{ background: 'linear-gradient(to right, var(--bg-primary), transparent)' }} />
+            <div className="absolute bottom-0 left-0 right-0 h-1/3" style={{ background: 'linear-gradient(to top, var(--bg-primary), transparent)' }} />
           </div>
         </section>
 
         {/* ═══════════════════════════════════════════════════════════
             CAPABILITIES
             ═══════════════════════════════════════════════════════════ */}
-        <section className="py-24 md:py-32 relative" style={{ background: 'var(--bg-secondary)' }}>
+        <section className="py-24 md:py-32 relative backdrop-blur-sm" style={{ background: 'rgba(var(--bg-secondary-rgb), 0.88)' }}>
           <div className="max-w-7xl mx-auto px-6 md:px-12">
             <Reveal>
               <h2 className="font-bold tracking-tight mb-4" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(1.75rem, 3.5vw, 3rem)' }}>
@@ -796,16 +834,18 @@ export default function PortfolioPage() {
                 { icon: MonitorSmartphone, title: 'AIGC Visual System', desc: '把 AI 生成结果变成统一视觉语言。' },
               ].map((item, idx) => (
                 <Reveal key={item.title} delay={(idx + 1) * 100}>
-                  <div className="p-8 rounded-3xl border backdrop-blur-md transition-colors group"
-                    style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-card-hover)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-card)')}>
-                    <item.icon className="w-8 h-8 mb-6 transition-colors" style={{ color: 'var(--text-tertiary)' }}
-                      onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
-                      onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-tertiary)')} />
-                    <h3 className="text-xl font-medium mb-3" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{item.title}</h3>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item.desc}</p>
-                  </div>
+                  <TiltCard intensity={5}>
+                    <div className="p-8 rounded-3xl border backdrop-blur-md transition-colors group h-full"
+                      style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-card-hover)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-card)')}>
+                      <item.icon className="w-8 h-8 mb-6 transition-colors" style={{ color: 'var(--text-tertiary)' }}
+                        onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+                        onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-tertiary)')} />
+                      <h3 className="text-xl font-medium mb-3" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{item.title}</h3>
+                      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item.desc}</p>
+                    </div>
+                  </TiltCard>
                 </Reveal>
               ))}
             </div>
@@ -911,7 +951,7 @@ export default function PortfolioPage() {
         {/* ═══════════════════════════════════════════════════════════
             PROCESS
             ═══════════════════════════════════════════════════════════ */}
-        <section id="process" className="py-24 md:py-32" style={{ background: 'var(--bg-secondary)' }}>
+        <section id="process" className="py-24 md:py-32 backdrop-blur-sm" style={{ background: 'rgba(var(--bg-secondary-rgb), 0.88)' }}>
           <div className="max-w-7xl mx-auto px-6 md:px-12">
             <Reveal>
               <h2 className="font-bold tracking-tight mb-4" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(1.75rem, 3.5vw, 3rem)' }}>
@@ -930,15 +970,17 @@ export default function PortfolioPage() {
                 { title: 'Prototype', desc: '完成前端原型' },
               ].map((step, idx) => (
                 <Reveal key={step.title} delay={idx * 100} className="relative z-10">
-                  <div className="p-8 border rounded-3xl h-full flex flex-col group transition-colors duration-500 relative overflow-hidden"
-                    style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)' }}
-                    onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--border-medium)')}
-                    onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border-subtle)')}>
-                    <div className="absolute top-0 right-0 p-4 text-[100px] font-bold leading-none pointer-events-none" style={{ color: 'var(--text-primary)', opacity: 0.02 }}>{idx + 1}</div>
-                    <span className="text-xs font-mono tracking-widest mb-6" style={{ color: 'var(--text-muted)' }}>STEP 0{idx + 1}</span>
-                    <h3 className="text-2xl font-bold mb-4 tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{step.title}</h3>
-                    <p className="text-sm leading-relaxed mt-auto transition-colors" style={{ color: 'var(--text-secondary)' }}>{step.desc}</p>
-                  </div>
+                  <TiltCard intensity={4}>
+                    <div className="p-8 border rounded-3xl h-full flex flex-col group transition-colors duration-500 relative overflow-hidden"
+                      style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)' }}
+                      onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--border-medium)')}
+                      onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border-subtle)')}>
+                      <div className="absolute top-0 right-0 p-4 text-[100px] font-bold leading-none pointer-events-none" style={{ color: 'var(--text-primary)', opacity: 0.02 }}>{idx + 1}</div>
+                      <span className="text-xs font-mono tracking-widest mb-6" style={{ color: 'var(--text-muted)' }}>STEP 0{idx + 1}</span>
+                      <h3 className="text-2xl font-bold mb-4 tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{step.title}</h3>
+                      <p className="text-sm leading-relaxed mt-auto transition-colors" style={{ color: 'var(--text-secondary)' }}>{step.desc}</p>
+                    </div>
+                  </TiltCard>
                 </Reveal>
               ))}
             </div>
@@ -987,7 +1029,7 @@ export default function PortfolioPage() {
         {/* ═══════════════════════════════════════════════════════════
             CONTACT — 视觉冲击尾页
             ═══════════════════════════════════════════════════════════ */}
-        <section id="contact" className="py-24 md:py-32 relative overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
+        <section id="contact" className="py-24 md:py-32 relative overflow-hidden backdrop-blur-sm" style={{ background: 'rgba(var(--bg-secondary-rgb), 0.88)' }}>
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <h1 className="font-bold tracking-tighter" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(12vw, 20vw, 22vw)', opacity: 0.025 }}>
               LAY
