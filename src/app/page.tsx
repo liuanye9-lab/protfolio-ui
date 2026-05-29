@@ -330,31 +330,17 @@ const ImageGallery = ({ images }: { images?: string[] }) => {
   return (
     <div className="mb-16">
       <h3 className="text-2xl font-medium tracking-tight mb-8" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Project Gallery</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        {/* 第一张图 — 全宽跨列 */}
-        <button aria-label="Enlarge image"
-          className="md:col-span-2 relative group focus:outline-none focus:ring-2 rounded-2xl overflow-hidden"
-          onClick={() => openLightbox(images[0], 0)}>
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center backdrop-blur-sm duration-500"
-            style={{ background: 'var(--bg-card-10)' }}>
-            <span className="text-sm font-mono tracking-widest px-5 py-2.5 rounded-full border"
-              style={{ background: 'var(--bg-card-8)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>View Full Size</span>
-          </div>
-          <img src={images[0]} alt="Gallery 1" className="w-full h-[280px] md:h-[520px] object-cover rounded-2xl border shadow-2xl transition-transform duration-700 group-hover:scale-[1.01]"
-            style={{ borderColor: 'var(--border-subtle)' }} />
-        </button>
-
-        {/* 下面三张 */}
-        {images.slice(1).map((img, i) => (
-          <button key={i + 1} aria-label="Enlarge image"
-            className="relative group focus:outline-none focus:ring-2 rounded-2xl overflow-hidden"
-            onClick={() => openLightbox(img, i + 1)}>
+      <div className="flex flex-col gap-6">
+        {images.map((img, i) => (
+          <button key={i} aria-label="Enlarge image"
+            className="relative group focus:outline-none focus:ring-2 rounded-2xl overflow-hidden w-full"
+            onClick={() => openLightbox(img, i)}>
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center backdrop-blur-sm duration-500"
               style={{ background: 'var(--bg-card-10)' }}>
               <span className="text-sm font-mono tracking-widest px-5 py-2.5 rounded-full border"
                 style={{ background: 'var(--bg-card-8)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>View Full Size</span>
             </div>
-            <img src={img} alt={`Gallery ${i + 2}`} className="w-full h-[200px] md:h-[320px] object-cover rounded-2xl border shadow-xl transition-transform duration-700 group-hover:scale-[1.02]"
+            <img src={img} alt={`Gallery ${i + 1}`} className="w-full h-[280px] md:h-[520px] object-cover rounded-2xl border shadow-2xl transition-transform duration-700 group-hover:scale-[1.01]"
               style={{ borderColor: 'var(--border-subtle)' }} />
           </button>
         ))}
