@@ -47,7 +47,7 @@ const PROJECTS = [
     reflection: '我理解了 AI 产品的核心不在于拟人化，而在于信任感。用户只有看懂了 AI 在做什么，才会真正信任并把工作交给它。下一步将探索更细颗粒度的节点编辑能力。',
     cover: '/ChatGPT Image 2026年5月29日 01_25_19 (1).png',
     video: '/1.mp4',
-    gallery: ['/ChatGPT Image 2026年5月29日 01_25_19 (1).png']
+    gallery: ['/1-1.png', '/1-2.png', '/1-3.png', '/1-4.png']
   },
   {
     id: 'vibe-copilot',
@@ -74,7 +74,7 @@ const PROJECTS = [
     reflection: '好产品不是替用户思考，而是搭建脚手架帮助用户思考。下一步计划引入历史组件库的联动匹配。',
     cover: '/ChatGPT Image 2026年5月29日 01_25_19 (2).png',
     video: '/2.mp4',
-    gallery: ['/ChatGPT Image 2026年5月29日 01_25_19 (2).png']
+    gallery: ['/2-1.png', '/2-2.png', '/2-3.png', '/2-4.png']
   },
   {
     id: 'controlnet-workflow',
@@ -101,7 +101,7 @@ const PROJECTS = [
     reflection: 'AI 并不是终点，它只是工作流中的一个强力滤镜。下一步计划将工作流打包为更轻量的设计师 API 工具。',
     cover: '/ChatGPT Image 2026年5月29日 01_25_19 (3).png',
     video: '/3.mp4',
-    gallery: ['/ChatGPT Image 2026年5月29日 01_25_19 (3).png']
+    gallery: ['/3-1.png', '/3-2.png', '/3-3.png', '/3-4.png']
   },
   {
     id: 'idea-translator',
@@ -128,7 +128,7 @@ const PROJECTS = [
     reflection: '结构化是 LLM 最被低估的能力。下一步可以加入一键生成需求文档（PRD）功能。',
     cover: '/ChatGPT Image 2026年5月29日 01_25_19 (4).png',
     video: '/4.mp4',
-    gallery: ['/ChatGPT Image 2026年5月29日 01_25_19 (4).png']
+    gallery: ['/4-1.png', '/4-2.png', '/4-3.png', '/4-4.png']
   }
 ];
 
@@ -305,32 +305,89 @@ const HeroVisual = () => {
 
 const ImageGallery = ({ images }: { images?: string[] }) => {
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+  const [lightboxIdx, setLightboxIdx] = useState(0);
   if (!images || images.length === 0) return null;
+
+  const openLightbox = (img: string, idx: number) => {
+    setLightboxImg(img);
+    setLightboxIdx(idx);
+  };
+
+  const nextImg = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = (lightboxIdx + 1) % images.length;
+    setLightboxIdx(next);
+    setLightboxImg(images[next]);
+  };
+
+  const prevImg = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const prev = (lightboxIdx - 1 + images.length) % images.length;
+    setLightboxIdx(prev);
+    setLightboxImg(images[prev]);
+  };
 
   return (
     <div className="mb-16">
-      <h3 className="text-2xl font-medium tracking-tight mb-8" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Visual Gallery</h3>
-      <div className="flex overflow-x-auto gap-6 pb-6 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden touch-pan-x" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-        {images.map((img, i) => (
-          <button key={i} aria-label="Enlarge image"
-            className="min-w-[85%] md:min-w-[65%] snap-center relative group focus:outline-none focus:ring-2 rounded-2xl"
-            onClick={() => setLightboxImg(img)}>
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity z-10 rounded-2xl flex items-center justify-center backdrop-blur-sm duration-500"
+      <h3 className="text-2xl font-medium tracking-tight mb-8" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Project Gallery</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        {/* 第一张图 — 全宽跨列 */}
+        <button aria-label="Enlarge image"
+          className="md:col-span-2 relative group focus:outline-none focus:ring-2 rounded-2xl overflow-hidden"
+          onClick={() => openLightbox(images[0], 0)}>
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center backdrop-blur-sm duration-500"
+            style={{ background: 'var(--bg-card-10)' }}>
+            <span className="text-sm font-mono tracking-widest px-5 py-2.5 rounded-full border"
+              style={{ background: 'var(--bg-card-8)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>View Full Size</span>
+          </div>
+          <img src={images[0]} alt="Gallery 1" className="w-full h-[280px] md:h-[520px] object-cover rounded-2xl border shadow-2xl transition-transform duration-700 group-hover:scale-[1.01]"
+            style={{ borderColor: 'var(--border-subtle)' }} />
+        </button>
+
+        {/* 下面三张 */}
+        {images.slice(1).map((img, i) => (
+          <button key={i + 1} aria-label="Enlarge image"
+            className="relative group focus:outline-none focus:ring-2 rounded-2xl overflow-hidden"
+            onClick={() => openLightbox(img, i + 1)}>
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center backdrop-blur-sm duration-500"
               style={{ background: 'var(--bg-card-10)' }}>
-              <span className="text-sm font-mono tracking-widest px-4 py-2 rounded-full border"
-                style={{ background: 'var(--bg-card-8)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>Enlarge</span>
+              <span className="text-sm font-mono tracking-widest px-5 py-2.5 rounded-full border"
+                style={{ background: 'var(--bg-card-8)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>View Full Size</span>
             </div>
-            <img src={img} alt={`Gallery ${i}`} className="w-full h-[300px] md:h-[450px] object-cover rounded-2xl border shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]"
+            <img src={img} alt={`Gallery ${i + 2}`} className="w-full h-[200px] md:h-[320px] object-cover rounded-2xl border shadow-xl transition-transform duration-700 group-hover:scale-[1.02]"
               style={{ borderColor: 'var(--border-subtle)' }} />
           </button>
         ))}
       </div>
+
+      {/* Lightbox */}
       <div className={`fixed inset-0 z-[100] flex items-center justify-center transition-all duration-500 ${lightboxImg ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         style={{ background: 'var(--bg-overlay)', backdropFilter: 'blur(24px)' }}
         onClick={() => setLightboxImg(null)}>
         <div className={`transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${lightboxImg ? 'scale-100 translate-y-0' : 'scale-95 translate-y-8'}`}>
-          {lightboxImg && <img src={lightboxImg} className="max-w-[95vw] max-h-[95vh] object-contain rounded-xl shadow-2xl" alt="Lightbox" />}
+          {lightboxImg && <img src={lightboxImg} className="max-w-[95vw] max-h-[92vh] object-contain rounded-xl shadow-2xl" alt="Lightbox" />}
         </div>
+
+        {/* Navigation arrows */}
+        {lightboxImg && (
+          <>
+            <button onClick={prevImg} aria-label="Previous image"
+              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-full backdrop-blur-md border hover:transition-colors focus:outline-none"
+              style={{ background: 'var(--bg-card-10)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
+              <ChevronRight size={24} className="rotate-180" />
+            </button>
+            <button onClick={nextImg} aria-label="Next image"
+              className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-full backdrop-blur-md border hover:transition-colors focus:outline-none"
+              style={{ background: 'var(--bg-card-10)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
+              <ChevronRight size={24} />
+            </button>
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-xs font-mono tracking-wider"
+              style={{ background: 'var(--bg-card-10)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              {lightboxIdx + 1} / {images.length}
+            </div>
+          </>
+        )}
+
         <button aria-label="Close lightbox" onClick={() => setLightboxImg(null)}
           className="absolute top-6 right-6 md:top-10 md:right-10 w-12 h-12 flex items-center justify-center rounded-full hover:transition-colors border backdrop-blur-md focus:outline-none focus:ring-2"
           style={{ background: 'var(--bg-card-10)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}>
@@ -568,11 +625,7 @@ const ProjectModal = ({ project, onClose }: { project: any, onClose: () => void 
             </div>
           </header>
 
-          <figure className="w-full aspect-video rounded-2xl border mb-16 relative overflow-hidden shadow-2xl" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-primary)' }}>
-            <img src={project.cover} alt={`${project.title} Cover`} className="w-full h-full object-cover" />
-          </figure>
-
-          <ImageGallery images={project.gallery?.filter((img: string) => img !== project.cover)} />
+          <ImageGallery images={project.gallery} />
 
           <section className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 pt-16" style={{ borderTop: '1px solid var(--border-subtle)' }}>
             <div className="md:col-span-1">
