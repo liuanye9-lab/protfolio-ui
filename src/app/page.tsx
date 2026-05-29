@@ -804,10 +804,20 @@ export default function PortfolioPage() {
           </div>
 
           {/* 右侧人像照片背景 */}
-          <div className="absolute right-0 top-0 h-full w-full md:w-[55%] lg:w-[50%] pointer-events-none z-0 hidden md:block" style={{ maskImage: 'linear-gradient(to left, black 50%, transparent 100%), linear-gradient(to top, transparent 0%, black 20%)', WebkitMaskImage: 'linear-gradient(to left, black 50%, transparent 100%), linear-gradient(to top, transparent 0%, black 20%)' }}>
-            <img src="/home-portrait-bg.jpg" alt="Lay Liu Portrait" className="w-full h-full object-cover object-top" style={{ opacity: 0.3, filter: 'blur(0.5px)' }} />
-            <div className="absolute inset-y-0 left-0 w-2/3" style={{ background: 'linear-gradient(to right, var(--bg-primary), transparent)' }} />
-            <div className="absolute bottom-0 left-0 right-0 h-1/3" style={{ background: 'linear-gradient(to top, var(--bg-primary), transparent)' }} />
+          <div className="absolute right-0 top-0 h-full w-full md:w-[55%] lg:w-[50%] pointer-events-none z-0 hidden md:block">
+            {/* 照片本体 — 更高透明度、无模糊 */}
+            <img
+              src="/home-portrait-bg.jpg"
+              alt="Lay Liu Portrait"
+              className="w-full h-full object-cover object-top"
+              style={{ opacity: 0.55 }}
+            />
+            {/* 左侧渐变遮罩 — 用实色彻底挡住背景视频穿透 */}
+            <div className="absolute inset-y-0 left-0 w-3/4" style={{ background: 'linear-gradient(to right, var(--bg-primary) 30%, transparent 100%)' }} />
+            {/* 底部渐变遮罩 — 加强遮挡 */}
+            <div className="absolute bottom-0 left-0 right-0 h-2/5" style={{ background: 'linear-gradient(to top, var(--bg-primary) 40%, transparent 100%)' }} />
+            {/* 顶部渐变遮罩 */}
+            <div className="absolute top-0 left-0 right-0 h-1/5" style={{ background: 'linear-gradient(to bottom, var(--bg-primary) 20%, transparent 100%)' }} />
           </div>
         </section>
 
