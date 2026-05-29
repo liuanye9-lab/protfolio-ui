@@ -625,6 +625,10 @@ const ProjectModal = ({ project, onClose }: { project: any, onClose: () => void 
             </div>
           </header>
 
+          <figure className="w-full aspect-video rounded-2xl border mb-8 relative overflow-hidden shadow-2xl" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-primary)' }}>
+            <img src={project.cover} alt={`${project.title} Cover`} className="w-full h-full object-cover" />
+          </figure>
+
           <ImageGallery images={project.gallery} />
 
           <section className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 pt-16" style={{ borderTop: '1px solid var(--border-subtle)' }}>
