@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowRight, Mail, X, ChevronRight, Layout, Workflow, MonitorSmartphone } from 'lucide-react';
 import SilkVideoBackground from '@/components/SilkVideoBackground';
 import CursorAura from '@/components/CursorAura';
+import InteractiveIntroHero from '@/components/InteractiveIntroHero';
 
 // ── Utility ──
 const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
@@ -168,41 +169,6 @@ function useIntersectionObserver(options = {}) {
   return [ref, isIntersecting] as const;
 }
 
-// ── Scroll-Driven Wallpaper Opacity ──
-function useScrollWallpaperOpacity() {
-  const [factor, setFactor] = useState(0);
-
-  useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const heroHeight = window.innerHeight;
-          const heroProgress = clamp(window.scrollY / heroHeight, 0, 1);
-          const wallpaperFactor = heroProgress < 0.85 ? heroProgress * 0.6 : 1;
-          setFactor(wallpaperFactor);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const baseOpacity = 0.10;
-  const mutedOpacity = 0.04;
-  const finalOpacity = mutedOpacity + (baseOpacity - mutedOpacity) * factor;
-
-  const wallpaperClass = factor > 0.85
-    ? 'hero-video-wallpaper hero-video-wallpaper--visible'
-    : 'hero-video-wallpaper';
-
-  return { wallpaperOpacity: finalOpacity, wallpaperClass };
-}
-
-// ── Components ──
-
 const ProgressBar = () => {
   const progressRef = useRef<HTMLDivElement>(null);
 
@@ -233,78 +199,6 @@ const ProgressBar = () => {
         className="h-full origin-left scale-x-0"
         style={{ background: 'var(--progress-fill)', transition: 'transform 0.1s ease-out' }}
       />
-    </div>
-  );
-};
-
-const HeroVisual = ({ opacityOverride }: { opacityOverride?: number }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouse = useRef({ x: 0, y: 0 });
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    mouse.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    const handleMouseMove = (e: MouseEvent) => { mouse.current = { x: e.clientX, y: e.clientY }; };
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
-    const handleResize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', handleResize);
-
-    const orbs = Array.from({ length: 4 }).map(() => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.5,
-      vy: (Math.random() - 0.5) * 0.5,
-      radius: Math.random() * 150 + 100,
-    }));
-
-    let animationFrameId: number;
-    const render = () => {
-      ctx.clearRect(0, 0, width, height);
-      const baseColor = '200, 210, 225';
-      ctx.globalCompositeOperation = 'screen';
-      orbs.forEach((orb, i) => {
-        if (orb.x < 0 || orb.x > width) orb.vx *= -1;
-        if (orb.y < 0 || orb.y > height) orb.vy *= -1;
-        orb.x += orb.vx; orb.y += orb.vy;
-        const dx = mouse.current.x - orb.x;
-        const dy = mouse.current.y - orb.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 400) { orb.x += dx * 0.001; orb.y += dy * 0.001; }
-        const gradient = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
-        const alpha = i === 0 ? 0.06 : 0.03;
-        gradient.addColorStop(0, `rgba(${baseColor}, ${alpha})`);
-        gradient.addColorStop(1, `rgba(${baseColor}, 0)`);
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      animationFrameId = requestAnimationFrame(render);
-    };
-    render();
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
-
-  const finalOpacity = opacityOverride ?? 0.06;
-
-  return (
-    <div ref={containerRef} className="hero-video-wallpaper" style={{ opacity: finalOpacity, position: 'absolute' }}>
-      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" style={{ width: '100%', height: '100%', filter: 'blur(40px)' }} />
     </div>
   );
 };
@@ -478,50 +372,6 @@ const SpotlightCard = ({ children, className = "", onClick, videoSrc }: { childr
       )}
       <div className="relative w-full h-full flex flex-col md:flex-row pointer-events-none">
         {children}
-      </div>
-    </div>
-  );
-};
-
-const IntroScreen = ({ onComplete }: { onComplete: () => void }) => {
-  const [stage, setStage] = useState(0);
-
-  useEffect(() => {
-    const t1 = setTimeout(() => setStage(1), 400);
-    const t2 = setTimeout(() => setStage(2), 1800);
-    const t3 = setTimeout(() => { setStage(3); setTimeout(onComplete, 900); }, 3200);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, [onComplete]);
-
-  if (stage === 3) return null;
-
-  return (
-    <div className={`fixed inset-0 z-50 transition-opacity duration-700 ${stage === 2 ? 'opacity-0' : 'opacity-100'}`}
-      style={{ transitionTimingFunction: BEZIER, background: 'var(--bg-primary)' }}>
-      {/* 乱序摆放的巨大字母背景 — 透明度提高 */}
-      <div className="absolute inset-0 overflow-hidden">
-        <span className={`absolute font-bold tracking-tighter transition-all duration-1000 ${stage >= 1 ? 'opacity-[0.10] translate-y-0' : 'opacity-0 translate-y-12'}`}
-          style={{ transitionTimingFunction: BEZIER, fontSize: '42vw', left: '-5%', top: '-8%', lineHeight: 1, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
-          L
-        </span>
-        <span className={`absolute font-bold tracking-tighter transition-all duration-1000 delay-100 ${stage >= 1 ? 'opacity-[0.12] translate-y-0' : 'opacity-0 translate-y-12'}`}
-          style={{ transitionTimingFunction: BEZIER, fontSize: '38vw', right: '-8%', top: '5%', lineHeight: 1, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
-          A
-        </span>
-        <span className={`absolute font-bold tracking-tighter transition-all duration-1000 delay-200 ${stage >= 1 ? 'opacity-[0.09] translate-y-0' : 'opacity-0 translate-y-12'}`}
-          style={{ transitionTimingFunction: BEZIER, fontSize: '48vw', left: '25%', bottom: '-15%', lineHeight: 1, color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
-          Y
-        </span>
-      </div>
-
-      {/* 左下角 Hi, I'm Lay */}
-      <div className="absolute left-8 bottom-12 md:left-16 md:bottom-20">
-        <div className="overflow-hidden">
-          <p className={`font-medium tracking-tight transition-transform duration-700 delay-500 ${stage >= 1 ? 'translate-y-0' : 'translate-y-full'}`}
-            style={{ transitionTimingFunction: BEZIER, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)' }}>
-            Hi, I&rsquo;m Lay
-          </p>
-        </div>
       </div>
     </div>
   );
@@ -711,11 +561,9 @@ const ProjectModal = ({ project, onClose }: { project: any, onClose: () => void 
 // ── Main Page ──
 
 export default function PortfolioPage() {
-  const [introDone, setIntroDone] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [clickCount, setClickCount] = useState(0);
   useTheme();
-  const { wallpaperOpacity } = useScrollWallpaperOpacity();
 
   const handleLogoClick = useCallback(() => {
     setClickCount(c => c + 1);
@@ -727,14 +575,8 @@ export default function PortfolioPage() {
     }
   }, [clickCount]);
 
-  useEffect(() => {
-    if (!introDone) { document.body.style.overflow = 'hidden'; }
-    else { document.body.style.overflow = ''; window.scrollTo(0, 0); }
-  }, [introDone]);
-
   return (
     <div className="min-h-screen transition-colors duration-1000" style={{ color: 'var(--text-primary)' }}>
-      {!introDone && <IntroScreen onComplete={() => setIntroDone(true)} />}
       <SilkVideoBackground />
       <CursorAura />
       <ProgressBar />
@@ -742,72 +584,9 @@ export default function PortfolioPage() {
 
       <main className="relative z-10">
         {/* ═══════════════════════════════════════════════════════════
-            HERO — 个人品牌首屏
-            层级: z0=壁纸 → z1=清场遮罩 → z2=人像 → z3=文字 → z4=导航
+            INTERACTIVE INTRO HERO — 鼠标 reveal 中英切换首屏
             ═══════════════════════════════════════════════════════════ */}
-        <section className="hero-section">
-          {/* z-index 0: 动态壁纸背景（极弱，只做氛围） */}
-          <HeroVisual opacityOverride={wallpaperOpacity} />
-
-          {/* z-index 1: 清场遮罩，压低背景复杂度 */}
-          <div className="hero-background-cleaner" aria-hidden />
-
-          {/* z-index 2: 人像照片，右侧第二视觉中心 */}
-          <div className="hero-portrait-layer" aria-hidden>
-            <img src="/home-portrait-bg.jpg" alt="" />
-          </div>
-
-          {/* z-index 3: Hero 文字信息，最高可读层 */}
-          <div className="relative z-20 flex items-center min-h-screen px-6 md:px-12 max-w-7xl mx-auto">
-            <div className="hero-copy-panel pt-24 md:pt-0">
-              <Reveal delay={200}>
-                <h1 className="hero-name">刘安烨</h1>
-              </Reveal>
-
-              <Reveal delay={300}>
-                <p className="hero-role">AI Agent UI Designer</p>
-              </Reveal>
-
-              <Reveal delay={450}>
-                <h2 className="hero-title">
-                  Designing interfaces for AI Agent products.
-                </h2>
-              </Reveal>
-
-              <Reveal delay={550}>
-                <p className="hero-meta">
-                  东北农业大学｜双一流｜211 · 设计学背景，辅修计算机科学
-                </p>
-              </Reveal>
-
-              <Reveal delay={650}>
-                <p className="hero-value">
-                  擅长把 AI 项目从概念、逻辑、视觉到前端原型完整设计出来。
-                </p>
-              </Reveal>
-
-              <Reveal delay={800}>
-                <div className="hero-actions">
-                  <button onClick={() => document.getElementById('works')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="px-6 py-3 rounded-full font-medium text-sm hover:opacity-90 transition-all flex items-center gap-2 focus:outline-none focus:ring-2"
-                    style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', fontFamily: 'var(--font-text)' }}>
-                    View Works <ArrowRight size={16} />
-                  </button>
-                  <button onClick={() => document.getElementById('process')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="px-6 py-3 rounded-full font-medium text-sm hover:transition-colors focus:outline-none focus:ring-2"
-                    style={{ background: 'var(--btn-secondary-bg)', border: '1px solid var(--btn-secondary-border)', color: 'var(--btn-secondary-text)' }}>
-                    My Process
-                  </button>
-                  <button onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="px-6 py-3 rounded-full font-medium text-sm hover:transition-colors focus:outline-none focus:ring-2"
-                    style={{ background: 'var(--btn-secondary-bg)', border: '1px solid var(--btn-secondary-border)', color: 'var(--btn-secondary-text)' }}>
-                    Contact
-                  </button>
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </section>
+        <InteractiveIntroHero />
 
         {/* ═══════════════════════════════════════════════════════════
             CAPABILITIES
