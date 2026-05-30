@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowRight, Mail, X, ChevronRight, Layout, Workflow, MonitorSmartphone } from 'lucide-react';
+import { ArrowRight, Mail, X, ChevronRight, Layout, Workflow, MonitorSmartphone, Sun, Moon } from 'lucide-react';
 import StaticFrostedBackground from '@/components/StaticFrostedBackground';
 import CursorAura from '@/components/CursorAura';
 import InteractiveIntroHero from '@/components/InteractiveIntroHero';
@@ -136,15 +136,31 @@ const PROJECTS = [
   }
 ];
 
-// ── Dark-Only Theme (no toggle) ──
+// ── Theme Hook (localStorage + system preference + toggle) ──
 function useTheme() {
+  const [isLight, setIsLight] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
+    const saved = localStorage.getItem("theme");
+    let nextIsLight = false;
+    if (saved === "light") nextIsLight = true;
+    else if (saved === "dark") nextIsLight = false;
+    else nextIsLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+    setIsLight(nextIsLight);
+    document.documentElement.setAttribute("data-theme", nextIsLight ? "light" : "dark");
+    setMounted(true);
   }, []);
 
-  return {};
+  useEffect(() => {
+    if (!mounted) return;
+    document.documentElement.setAttribute("data-theme", isLight ? "light" : "dark");
+    localStorage.setItem("theme", isLight ? "light" : "dark");
+  }, [isLight, mounted]);
+
+  const toggle = useCallback(() => setIsLight(prev => !prev), []);
+
+  return { isLight, toggle, mounted };
 }
 
 // ── Intersection Observer Hook ──
@@ -375,7 +391,7 @@ const SpotlightCard = ({ children, className = "", onClick, videoSrc }: { childr
   );
 };
 
-const NavBar = ({ onLogoClick }: { onLogoClick: () => void }) => {
+const NavBar = ({ onLogoClick, isLight, onToggleTheme }: { onLogoClick: () => void; isLight: boolean; onToggleTheme: () => void }) => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -407,6 +423,15 @@ const NavBar = ({ onLogoClick }: { onLogoClick: () => void }) => {
           <button onClick={() => scrollTo('about')} className="hover:transition-colors focus:outline-none"
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
             onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>About</button>
+          {/* Theme Toggle */}
+          <button
+            type="button"
+            aria-label={isLight ? "Switch to dark mode" : "Switch to light mode"}
+            className="ios-icon theme-toggle ml-1"
+            onClick={onToggleTheme}
+          >
+            {isLight ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
         </div>
       </div>
     </nav>
@@ -561,7 +586,7 @@ const ProjectModal = ({ project, onClose }: { project: any, onClose: () => void 
 export default function PortfolioPage() {
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [clickCount, setClickCount] = useState(0);
-  useTheme();
+  const { isLight, toggle } = useTheme();
 
   const handleLogoClick = useCallback(() => {
     setClickCount(c => c + 1);
@@ -578,7 +603,7 @@ export default function PortfolioPage() {
       <StaticFrostedBackground />
       <CursorAura />
       <ProgressBar />
-      <NavBar onLogoClick={handleLogoClick} />
+      <NavBar onLogoClick={handleLogoClick} isLight={isLight} onToggleTheme={toggle} />
 
       <main className="relative z-10">
         {/* ═══════════════════════════════════════════════════════════
