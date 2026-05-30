@@ -56,18 +56,14 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Dark-Only Theme — Warm charcoal with cool accent
+   Base Styles
    ═══════════════════════════════════════════════════════════════ */
-
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   scroll-behavior: smooth;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   Base Styles
-   ═══════════════════════════════════════════════════════════════ */
 html {
   font-family: var(--font-text);
   -webkit-font-smoothing: antialiased;
@@ -92,4 +88,289 @@ html {
 
 .preserve-3d {
   transform-style: preserve-3d;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Hero Background Cleaner — 压低背景复杂度，保护文字与融合人像
+   ═══════════════════════════════════════════════════════════════ */
+.hero-background-cleaner {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(15,15,18,0.96) 0%,
+      rgba(15,15,18,0.84) 34%,
+      rgba(15,15,18,0.54) 58%,
+      rgba(15,15,18,0.72) 100%
+    ),
+    radial-gradient(
+      circle at 72% 42%,
+      rgba(255,255,255,0.08) 0%,
+      rgba(15,15,18,0.32) 46%,
+      rgba(15,15,18,0.70) 82%
+    );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Hero Copy Panel — 文字隐形阅读保护层（柔和光场，非明显卡片）
+   ═══════════════════════════════════════════════════════════════ */
+.hero-copy-panel {
+  position: relative;
+  z-index: 3;
+  isolation: isolate;
+  max-width: 620px;
+}
+
+.hero-copy-panel::before {
+  content: "";
+  position: absolute;
+  inset: -36px -48px;
+  border-radius: 42px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(15,15,18,0.78),
+      rgba(15,15,18,0.42),
+      rgba(15,15,18,0)
+    );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Hero Portrait Layer — 人像融入背景光影系统
+   ═══════════════════════════════════════════════════════════════ */
+.hero-portrait-layer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: min(54vw, 760px);
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.46;
+  mix-blend-mode: normal;
+  mask-image:
+    linear-gradient(to left, black 56%, transparent 100%),
+    linear-gradient(to top, transparent 0%, black 24%);
+  -webkit-mask-image:
+    linear-gradient(to left, black 56%, transparent 100%),
+    linear-gradient(to top, transparent 0%, black 24%);
+}
+
+.hero-portrait-layer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  filter: grayscale(1) contrast(1.08) brightness(0.84);
+  transform: scale(1.02);
+}
+
+.hero-portrait-layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 56% 38%,
+      rgba(255,255,255,0.10),
+      rgba(0,0,0,0.18) 42%,
+      rgba(0,0,0,0.52) 78%
+    );
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Hero Typography — 名字 / 身份 / 标题 / 元信息 / 价值句
+   ═══════════════════════════════════════════════════════════════ */
+.hero-name {
+  font-size: clamp(4rem, 8vw, 8.5rem);
+  line-height: 0.95;
+  font-weight: 800;
+  letter-spacing: -0.08em;
+  color: rgba(248,248,248,0.96);
+  text-shadow: 0 18px 70px rgba(0,0,0,0.55);
+  font-family: var(--font-display);
+}
+
+.hero-role {
+  margin-top: 18px;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.62);
+}
+
+.hero-title {
+  margin-top: 34px;
+  font-size: clamp(2rem, 4vw, 4.2rem);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  color: rgba(245,245,245,0.92);
+  max-width: 780px;
+  font-family: var(--font-display);
+}
+
+.hero-meta {
+  margin-top: 28px;
+  font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+  color: rgba(255,255,255,0.78);
+}
+
+.hero-value {
+  margin-top: 12px;
+  max-width: 560px;
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  line-height: 1.75;
+  color: rgba(255,255,255,0.68);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Hero Video Background — 滚动驱动动态壁纸弱化
+   ═══════════════════════════════════════════════════════════════ */
+.hero-video-wallpaper {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+              filter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  opacity: 0.10;
+  filter: saturate(0.35) contrast(0.82) brightness(0.58) blur(1px);
+}
+
+.hero-video-wallpaper--visible {
+  opacity: 0.22;
+  filter: saturate(0.65) contrast(0.95) brightness(0.72) blur(0px);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Site Navigation Pill — iOS 胶囊浮层
+   ═══════════════════════════════════════════════════════════════ */
+.site-nav-pill {
+  background: rgba(10,10,12,0.68);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow:
+    0 16px 40px rgba(0,0,0,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.site-nav-pill a,
+.site-nav-pill button {
+  color: rgba(255,255,255,0.64);
+}
+
+.site-nav-pill a:hover,
+.site-nav-pill button:hover {
+  color: rgba(255,255,255,0.96);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Project Card — 空间浮层增强
+   ═══════════════════════════════════════════════════════════════ */
+.project-card {
+  background: rgba(10,10,12,0.74);
+  backdrop-filter: blur(28px) saturate(1.1);
+  -webkit-backdrop-filter: blur(28px) saturate(1.1);
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow:
+    0 34px 100px rgba(0,0,0,0.46),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.project-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(255,255,255,0.26);
+  box-shadow:
+    0 42px 120px rgba(0,0,0,0.58),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* Card image brightness */
+.project-card img {
+  opacity: 0.88;
+  filter: contrast(1.02) brightness(0.92);
+}
+
+.project-card:hover img {
+  opacity: 0.98;
+  filter: contrast(1.05) brightness(1.0);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Works Section — 区域背景层级优化
+   ═══════════════════════════════════════════════════════════════ */
+.works-section {
+  position: relative;
+  isolation: isolate;
+}
+
+.works-section::before {
+  content: "";
+  position: absolute;
+  inset: -120px 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,0.06), transparent 42%),
+    linear-gradient(
+      180deg,
+      rgba(15,15,18,0.72),
+      rgba(15,15,18,0.48),
+      rgba(15,15,18,0.78)
+    );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Hero section wrapper
+   ═══════════════════════════════════════════════════════════════ */
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Mobile Hero adaptations
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .hero-portrait-layer {
+    width: 100%;
+    opacity: 0.12;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 72%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 72%);
+  }
+
+  .hero-copy-panel::before {
+    inset: -28px -24px;
+    border-radius: 32px;
+  }
+
+  .hero-name {
+    font-size: clamp(3.2rem, 16vw, 5.4rem);
+  }
+
+  .hero-title {
+    font-size: clamp(1.8rem, 9vw, 3rem);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Hero Actions area
+   ═══════════════════════════════════════════════════════════════ */
+.hero-actions {
+  margin-top: 42px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }

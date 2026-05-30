@@ -5,6 +5,9 @@ import { ArrowRight, Mail, X, ChevronRight, Layout, Workflow, MonitorSmartphone 
 import SilkVideoBackground from '@/components/SilkVideoBackground';
 import CursorAura from '@/components/CursorAura';
 
+// ── Utility ──
+const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
+
 // ── Custom Brand Icons ──
 const GithubIcon = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -165,6 +168,39 @@ function useIntersectionObserver(options = {}) {
   return [ref, isIntersecting] as const;
 }
 
+// ── Scroll-Driven Wallpaper Opacity ──
+function useScrollWallpaperOpacity() {
+  const [factor, setFactor] = useState(0);
+
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const heroHeight = window.innerHeight;
+          const heroProgress = clamp(window.scrollY / heroHeight, 0, 1);
+          const wallpaperFactor = heroProgress < 0.85 ? heroProgress * 0.6 : 1;
+          setFactor(wallpaperFactor);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const baseOpacity = 0.10;
+  const mutedOpacity = 0.04;
+  const finalOpacity = mutedOpacity + (baseOpacity - mutedOpacity) * factor;
+
+  const wallpaperClass = factor > 0.85
+    ? 'hero-video-wallpaper hero-video-wallpaper--visible'
+    : 'hero-video-wallpaper';
+
+  return { wallpaperOpacity: finalOpacity, wallpaperClass };
+}
+
 // ── Components ──
 
 const ProgressBar = () => {
@@ -201,9 +237,10 @@ const ProgressBar = () => {
   );
 };
 
-const HeroVisual = () => {
+const HeroVisual = ({ opacityOverride }: { opacityOverride?: number }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouse = useRef({ x: 0, y: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     mouse.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
@@ -215,10 +252,10 @@ const HeroVisual = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let width = canvas.width = window.innerWidth / 2;
+    let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
     const handleResize = () => {
-      width = canvas.width = window.innerWidth / 2;
+      width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     };
     window.addEventListener('resize', handleResize);
@@ -240,7 +277,7 @@ const HeroVisual = () => {
         if (orb.x < 0 || orb.x > width) orb.vx *= -1;
         if (orb.y < 0 || orb.y > height) orb.vy *= -1;
         orb.x += orb.vx; orb.y += orb.vy;
-        const dx = mouse.current.x - (window.innerWidth / 2) - orb.x + width/2;
+        const dx = mouse.current.x - orb.x;
         const dy = mouse.current.y - orb.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 400) { orb.x += dx * 0.001; orb.y += dy * 0.001; }
@@ -263,19 +300,11 @@ const HeroVisual = () => {
     };
   }, []);
 
+  const finalOpacity = opacityOverride ?? 0.06;
+
   return (
-    <div className="relative w-full h-[50vh] md:h-full flex items-center justify-center perspective-[1200px] preserve-3d">
-      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none opacity-60" style={{ width: '100%', height: '100%', filter: 'blur(40px)' }} />
-      <div className="absolute w-64 h-40 md:w-96 md:h-56 border rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-1000 overflow-hidden preserve-3d"
-        style={{ transform: `rotateX(15deg) rotateY(-15deg) translateZ(50px)`, borderColor: 'var(--border-subtle)', background: 'var(--bg-primary)' }}>
-        <img src={PROJECTS[0].cover} alt="StableAgent OS" className="w-full h-full object-cover opacity-90" />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top right, var(--bg-primary) 40%, transparent)' }} />
-      </div>
-      <div className="absolute w-56 h-32 md:w-80 md:h-48 border rounded-2xl flex items-center justify-center shadow-2xl z-10 transition-all duration-1000 overflow-hidden preserve-3d"
-        style={{ transform: `rotateX(5deg) rotateY(10deg) translateZ(100px)`, borderColor: 'var(--border-subtle)', background: 'var(--bg-secondary)' }}>
-        <img src={PROJECTS[2].cover} alt="ControlNet Workflow" className="w-full h-full object-cover opacity-90" />
-        <div className="absolute inset-0 border rounded-2xl pointer-events-none transition-colors duration-1000" style={{ borderColor: 'rgba(var(--accent-rgb), 0.2)' }} />
-      </div>
+    <div ref={containerRef} className="hero-video-wallpaper" style={{ opacity: finalOpacity, position: 'absolute' }}>
+      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" style={{ width: '100%', height: '100%', filter: 'blur(40px)' }} />
     </div>
   );
 };
@@ -436,10 +465,8 @@ const SpotlightCard = ({ children, className = "", onClick, videoSrc }: { childr
       onKeyDown={(e) => { if (e.key === 'Enter' && onClick) onClick(); }}
       onMouseMove={handleMouseMove} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onClick={onClick}
-      className={`relative overflow-hidden rounded-3xl border backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-offset-4 ${className}`}
+      className={`relative overflow-hidden rounded-3xl border project-card backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-offset-4 ${className}`}
       style={{
-        borderColor: 'var(--border-subtle)',
-        background: 'var(--bg-card)',
         transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) translateY(${opacity > 0 ? '-4px' : '0'})`,
         transitionTimingFunction: BEZIER,
       }}>
@@ -513,8 +540,8 @@ const NavBar = ({ onLogoClick }: { onLogoClick: () => void }) => {
 
   return (
     <nav className={`fixed top-6 left-1/2 -translate-x-1/2 z-40 transition-all duration-500 ${scrolled ? 'w-[92%] md:w-[440px]' : 'w-[92%] md:w-[520px]'}`}>
-      <div className="flex items-center justify-between px-5 py-3 rounded-full border backdrop-blur-xl shadow-2xl"
-        style={{ background: 'var(--bg-nav)', borderColor: 'var(--border-subtle)' }}>
+      <div className="site-nav-pill flex items-center justify-between px-5 py-3 rounded-full transition-colors duration-1000"
+        style={{ color: 'var(--text-secondary)' }}>
         <button className="font-medium tracking-tight cursor-pointer relative focus:outline-none"
           style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}
           onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); onLogoClick(); }}>
@@ -688,6 +715,7 @@ export default function PortfolioPage() {
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [clickCount, setClickCount] = useState(0);
   useTheme();
+  const { wallpaperOpacity } = useScrollWallpaperOpacity();
 
   const handleLogoClick = useCallback(() => {
     setClickCount(c => c + 1);
@@ -714,70 +742,70 @@ export default function PortfolioPage() {
 
       <main className="relative z-10">
         {/* ═══════════════════════════════════════════════════════════
-            HERO
+            HERO — 个人品牌首屏
+            层级: z0=壁纸 → z1=清场遮罩 → z2=人像 → z3=文字 → z4=导航
             ═══════════════════════════════════════════════════════════ */}
-        <section className="min-h-screen pt-24 pb-12 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-6 md:px-12 relative overflow-hidden"
-          style={{ background: 'linear-gradient(to right, rgba(15,15,18,0.88) 35%, rgba(15,15,18,0.35) 55%, transparent 100%)' }}>
-          <div className="w-full md:w-1/2 z-20 pt-20 md:pt-0 relative"
-            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}>
-            <Reveal delay={200}>
-              <div className="mb-6">
-                <h2 className="font-bold tracking-tight mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(2rem, 4vw, 3.5rem)', lineHeight: 1.1 }}>
-                  刘安烨
-                </h2>
-                <span className="text-sm font-mono tracking-wider" style={{ color: 'var(--text-secondary)' }}>AI Agent UI Designer</span>
-              </div>
-            </Reveal>
+        <section className="hero-section">
+          {/* z-index 0: 动态壁纸背景（极弱，只做氛围） */}
+          <HeroVisual opacityOverride={wallpaperOpacity} />
 
-            <Reveal delay={400}>
-              <h1 className="font-bold tracking-tight leading-[1.15] mb-6" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(1.75rem, 3.5vw, 3rem)' }}>
-                Designing interfaces for{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r transition-all duration-1000"
-                  style={{ backgroundImage: `linear-gradient(to right, var(--text-primary), var(--accent-color))` }}>
-                  AI Agent products
-                </span>.
-              </h1>
-            </Reveal>
+          {/* z-index 1: 清场遮罩，压低背景复杂度 */}
+          <div className="hero-background-cleaner" aria-hidden />
 
-            <Reveal delay={600}>
-              <p className="font-medium leading-relaxed mb-3" style={{ color: 'var(--text-primary-80)', fontSize: 'clamp(1rem, 1.8vw, 1.25rem)' }}>
-                擅长把 AI 项目从概念、逻辑、视觉到前端原型完整设计出来。
-              </p>
-              <p className="leading-relaxed max-w-lg mb-12" style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.8125rem, 1.2vw, 1rem)' }}>
-                设计训练让我对视觉秩序、叙事路径和体验节奏更敏感；AI 与前端实践让我理解产品背后的流程、模型能力和工程边界。
-              </p>
-            </Reveal>
-
-            <Reveal delay={800}>
-              <div className="flex flex-wrap gap-3">
-                <button onClick={() => document.getElementById('works')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-6 py-3 rounded-full font-medium text-sm hover:opacity-90 transition-all flex items-center gap-2 focus:outline-none focus:ring-2"
-                  style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', fontFamily: 'var(--font-text)' }}>
-                  View Works <ArrowRight size={16} />
-                </button>
-                <button onClick={() => document.getElementById('process')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-6 py-3 rounded-full font-medium text-sm hover:transition-colors focus:outline-none focus:ring-2"
-                  style={{ background: 'var(--btn-secondary-bg)', border: '1px solid var(--btn-secondary-border)', color: 'var(--btn-secondary-text)' }}>
-                  My Process
-                </button>
-                <button onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-6 py-3 rounded-full font-medium text-sm hover:transition-colors focus:outline-none focus:ring-2"
-                  style={{ background: 'var(--btn-secondary-bg)', border: '1px solid var(--btn-secondary-border)', color: 'var(--btn-secondary-text)' }}>
-                  Contact
-                </button>
-              </div>
-            </Reveal>
+          {/* z-index 2: 人像照片，右侧第二视觉中心 */}
+          <div className="hero-portrait-layer" aria-hidden>
+            <img src="/home-portrait-bg.jpg" alt="" />
           </div>
 
-          {/* 右侧人像照片背景 */}
-          <div className="absolute right-0 top-0 h-full w-full md:w-[65%] lg:w-[60%] pointer-events-none z-0 hidden md:block"
-            style={{ maskImage: 'linear-gradient(to left, black 60%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to left, black 60%, transparent 100%)' }}>
-            <img
-              src="/home-portrait-bg.jpg"
-              alt="Lay Liu Portrait"
-              className="w-full h-full object-cover object-top"
-              style={{ opacity: 0.85 }}
-            />
+          {/* z-index 3: Hero 文字信息，最高可读层 */}
+          <div className="relative z-20 flex items-center min-h-screen px-6 md:px-12 max-w-7xl mx-auto">
+            <div className="hero-copy-panel pt-24 md:pt-0">
+              <Reveal delay={200}>
+                <h1 className="hero-name">刘安烨</h1>
+              </Reveal>
+
+              <Reveal delay={300}>
+                <p className="hero-role">AI Agent UI Designer</p>
+              </Reveal>
+
+              <Reveal delay={450}>
+                <h2 className="hero-title">
+                  Designing interfaces for AI Agent products.
+                </h2>
+              </Reveal>
+
+              <Reveal delay={550}>
+                <p className="hero-meta">
+                  东北农业大学｜双一流｜211 · 设计学背景，辅修计算机科学
+                </p>
+              </Reveal>
+
+              <Reveal delay={650}>
+                <p className="hero-value">
+                  擅长把 AI 项目从概念、逻辑、视觉到前端原型完整设计出来。
+                </p>
+              </Reveal>
+
+              <Reveal delay={800}>
+                <div className="hero-actions">
+                  <button onClick={() => document.getElementById('works')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="px-6 py-3 rounded-full font-medium text-sm hover:opacity-90 transition-all flex items-center gap-2 focus:outline-none focus:ring-2"
+                    style={{ background: 'var(--btn-primary-bg)', color: 'var(--btn-primary-text)', fontFamily: 'var(--font-text)' }}>
+                    View Works <ArrowRight size={16} />
+                  </button>
+                  <button onClick={() => document.getElementById('process')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="px-6 py-3 rounded-full font-medium text-sm hover:transition-colors focus:outline-none focus:ring-2"
+                    style={{ background: 'var(--btn-secondary-bg)', border: '1px solid var(--btn-secondary-border)', color: 'var(--btn-secondary-text)' }}>
+                    My Process
+                  </button>
+                  <button onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="px-6 py-3 rounded-full font-medium text-sm hover:transition-colors focus:outline-none focus:ring-2"
+                    style={{ background: 'var(--btn-secondary-bg)', border: '1px solid var(--btn-secondary-border)', color: 'var(--btn-secondary-text)' }}>
+                    Contact
+                  </button>
+                </div>
+              </Reveal>
+            </div>
           </div>
         </section>
 
@@ -825,8 +853,8 @@ export default function PortfolioPage() {
         {/* ═══════════════════════════════════════════════════════════
             WORKS
             ═══════════════════════════════════════════════════════════ */}
-        <section id="works" className="py-24 md:py-32 relative">
-          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at top, rgba(var(--accent-rgb),0.03), transparent 50%)' }} />
+        <section id="works" className="works-section py-24 md:py-32 relative">
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at top, rgba(var(--accent-rgb),0.03), transparent 50%)', zIndex: -1 }} />
           <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
             <Reveal>
               <h2 className="font-bold tracking-tight mb-4" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: 'clamp(2rem, 4.5vw, 3.75rem)' }}>
