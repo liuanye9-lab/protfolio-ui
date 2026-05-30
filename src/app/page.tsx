@@ -2,12 +2,10 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowRight, Mail, X, ChevronRight, Layout, Workflow, MonitorSmartphone } from 'lucide-react';
-import SilkVideoBackground from '@/components/SilkVideoBackground';
+import StaticFrostedBackground from '@/components/StaticFrostedBackground';
 import CursorAura from '@/components/CursorAura';
 import InteractiveIntroHero from '@/components/InteractiveIntroHero';
-
-// ── Utility ──
-const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
+import ProfileHero from '@/components/ProfileHero';
 
 // ── Custom Brand Icons ──
 const GithubIcon = ({ size = 18 }: { size?: number }) => (
@@ -577,7 +575,7 @@ export default function PortfolioPage() {
 
   return (
     <div className="min-h-screen transition-colors duration-1000" style={{ color: 'var(--text-primary)' }}>
-      <SilkVideoBackground />
+      <StaticFrostedBackground />
       <CursorAura />
       <ProgressBar />
       <NavBar onLogoClick={handleLogoClick} />
@@ -587,6 +585,11 @@ export default function PortfolioPage() {
             INTERACTIVE INTRO HERO — 鼠标 reveal 中英切换首屏
             ═══════════════════════════════════════════════════════════ */}
         <InteractiveIntroHero />
+
+        {/* ═══════════════════════════════════════════════════════════
+            PROFILE HERO — 个人肖像第二屏
+            ═══════════════════════════════════════════════════════════ */}
+        <ProfileHero />
 
         {/* ═══════════════════════════════════════════════════════════
             CAPABILITIES
@@ -614,11 +617,11 @@ export default function PortfolioPage() {
                   <TiltCard intensity={5}>
                     <div className="p-8 rounded-3xl border backdrop-blur-xl transition-colors group h-full"
                       style={{ background: 'var(--bg-card-10)', borderColor: 'var(--border-subtle)' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-card-hover)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-card-10)')}>
-                      <item.icon className="w-8 h-8 mb-6 transition-colors" style={{ color: 'var(--text-tertiary)' }}
-                        onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
-                        onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-tertiary)')} />
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-card-hover)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-card-10)')}>
+                    <span className="ios-icon mb-5">
+                      <item.icon />
+                    </span>
                       <h3 className="text-xl font-medium mb-3" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{item.title}</h3>
                       <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item.desc}</p>
                     </div>
