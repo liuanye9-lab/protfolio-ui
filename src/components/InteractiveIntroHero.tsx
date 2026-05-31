@@ -1,6 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+
+const SIGNATURE_SRC = "/images/lay-signature-art.png";
+const SIGNATURE_LAYERS = ["one", "two", "three"] as const;
 
 export default function InteractiveIntroHero() {
   const rootRef = useRef<HTMLElement>(null);
@@ -51,13 +54,23 @@ export default function InteractiveIntroHero() {
       className="interactive-intro-hero"
       style={{ touchAction: "none" }}
     >
-      {/* ═══════ LAY 品牌纹理背景 ═══════ */}
-      <div className="intro-pattern" aria-hidden>
-        {Array.from({ length: 9 }).map((_, row) => (
-          <div key={row} className="intro-pattern-row"
-            style={{ ["--row-offset" as string]: row % 2 === 1 ? "-8vw" : "0" } as React.CSSProperties}>
-            LAY&nbsp;&nbsp;LAY&nbsp;&nbsp;LAY&nbsp;&nbsp;LAY&nbsp;&nbsp;LAY&nbsp;&nbsp;LAY&nbsp;&nbsp;LAY&nbsp;&nbsp;LAY
-          </div>
+      {/* ═══════ 个人手写签名背景 ═══════ */}
+      <div className="intro-signature-bg" aria-hidden>
+        {SIGNATURE_LAYERS.map((layer) => (
+          <span key={layer} className="intro-signature-layer">
+            <img
+              src={SIGNATURE_SRC}
+              alt=""
+              className={`intro-signature intro-signature--${layer}`}
+              onError={(event) => {
+                event.currentTarget.hidden = true;
+                event.currentTarget.parentElement?.classList.add("is-fallback");
+              }}
+            />
+            <span className={`intro-signature intro-signature-fallback intro-signature--${layer}`}>
+              LAY
+            </span>
+          </span>
         ))}
       </div>
 
