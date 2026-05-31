@@ -49,7 +49,7 @@ export default function InteractiveIntroHero() {
     <section
       ref={rootRef}
       className="interactive-intro-hero"
-      style={{ touchAction: "none" }}
+      style={{ touchAction: "pan-y" }}
     >
       <div className="intro-art-lay" aria-hidden>
         <img src="/lay-signature-art.png" alt="" />

@@ -140,7 +140,7 @@ const TiltCard = ({ children, className = "", intensity = 6 }: { children: React
   );
 };
 
-const SpotlightCard = ({ children, className = "", onClick, videoSrc, poster }: { children: React.ReactNode, className?: string, onClick?: () => void, videoSrc?: string | null, poster?: string }) => {
+const SpotlightCard = ({ children, className = "", onClick, videoSrc, poster, ariaLabel = "View Project Case Study" }: { children: React.ReactNode, className?: string, onClick?: () => void, videoSrc?: string | null, poster?: string, ariaLabel?: string }) => {
   const divRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -168,7 +168,7 @@ const SpotlightCard = ({ children, className = "", onClick, videoSrc, poster }: 
   const handleTouchEnd = () => { setOpacity(0); setRotation({ x: 0, y: 0 }); pauseVideo(); };
 
   return (
-    <div ref={divRef} role="button" tabIndex={0} aria-label="View Project Case Study"
+    <div ref={divRef} role="button" tabIndex={0} aria-label={ariaLabel}
       onKeyDown={(e) => { if (e.key === 'Enter' && onClick) onClick(); }}
       onMouseMove={handleMouseMove} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onClick={onClick}
@@ -397,7 +397,7 @@ export default function PortfolioPage() {
 
               {/* Project 04 */}
               <Reveal className="md:col-span-2 h-[300px]">
-                <SpotlightCard videoSrc={PROJECTS[3].video} poster={PROJECTS[3].cover} className="h-full flex-row group" onClick={() => handleProjectClick(PROJECTS[3])}>
+                <SpotlightCard videoSrc={PROJECTS[3].video} poster={PROJECTS[3].cover} className="h-full flex-row group" ariaLabel="More Projects" onClick={() => router.push(PROJECTS[3].href ?? '/projects/more')}>
                   <div className="w-full md:w-1/3 h-full absolute left-0 top-0 border-r overflow-hidden" style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)' }}>
                     <ImageWithFallback src={PROJECTS[3].cover} alt={PROJECTS[3].title}
                       className={`absolute inset-0 w-full h-full object-cover object-[75%_center] transition-all duration-1000 ease-out ${PROJECTS[3].video ? 'opacity-80 group-hover:opacity-0' : 'group-hover:scale-105 opacity-80'}`} />
@@ -467,10 +467,6 @@ export default function PortfolioPage() {
                 About Lay
               </h2>
               <div className="space-y-6 text-base md:text-lg leading-relaxed">
-                <p className="font-medium" style={{ color: 'var(--text-primary-70)' }}>
-                  东北农业大学｜双一流｜211<br />
-                  设计学背景｜辅修计算机科学
-                </p>
                 <p style={{ color: 'var(--text-secondary)' }}>
                   设计让我对视觉秩序、叙事路径和体验节奏更敏感；AI 与前端实践让我理解产品背后的流程、模型能力和工程边界。
                 </p>
