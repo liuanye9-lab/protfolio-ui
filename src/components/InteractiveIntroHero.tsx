@@ -2,9 +2,6 @@
 
 import { useEffect, useRef } from "react";
 
-const SIGNATURE_SRC = "/images/lay-signature-art.png";
-const SIGNATURE_LAYERS = ["one", "two", "three"] as const;
-
 export default function InteractiveIntroHero() {
   const rootRef = useRef<HTMLElement>(null);
   const cursorRef = useRef({ x: 0, y: 0, tx: 0, ty: 0, active: false });
@@ -54,24 +51,8 @@ export default function InteractiveIntroHero() {
       className="interactive-intro-hero"
       style={{ touchAction: "none" }}
     >
-      {/* ═══════ 个人手写签名背景 ═══════ */}
-      <div className="intro-signature-bg" aria-hidden>
-        {SIGNATURE_LAYERS.map((layer) => (
-          <span key={layer} className="intro-signature-layer">
-            <img
-              src={SIGNATURE_SRC}
-              alt=""
-              className={`intro-signature intro-signature--${layer}`}
-              onError={(event) => {
-                event.currentTarget.hidden = true;
-                event.currentTarget.parentElement?.classList.add("is-fallback");
-              }}
-            />
-            <span className={`intro-signature intro-signature-fallback intro-signature--${layer}`}>
-              LAY
-            </span>
-          </span>
-        ))}
+      <div className="intro-art-lay" aria-hidden>
+        <img src="/lay-signature-art.png" alt="" />
       </div>
 
       {/* ═══════ 顶部眉标 ═══════ */}
